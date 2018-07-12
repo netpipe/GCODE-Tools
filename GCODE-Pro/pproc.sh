@@ -30,12 +30,12 @@ sRecover=$(echo $hello| cut -d "|" -f3)
 
 if (( $stweakatz == "TweakAtZ" ))
     then
-    $btweakatz=1
+    btweakatz=1
 fi
 
 if (( $sRecover == "musicalPrint" ))
     then
-    $bmusicPrint=1
+    bmusicPrint=1
 fi
 
 if (( $sRecover == "Recover-Print" ))
