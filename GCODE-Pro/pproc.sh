@@ -33,7 +33,7 @@ if [[ $stweakatz == "TweakAtZ" ]]
     btweakatz=1
 fi
 
-if [[ $sRecover == "musicalPrint" ]]
+if [[ $smusicPrint == "musicalPrint" ]]
     then
     bmusicPrint=1
 fi
