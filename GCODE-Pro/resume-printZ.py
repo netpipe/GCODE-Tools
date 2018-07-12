@@ -11,13 +11,14 @@
 #use M114 to find Z if its in the proper spot still
 
 #guide used for this http://www.print3dforum.com/showthread.php/280-GUIDE-How-to-resume-an-interrupted-(abruptly!)-3D-Print
+#python -c $'i=2\nwhile True:\n\tprint("aha")'
 
 
 #
 
 import sys
 import re
-
+#import regex
 import os
 import shutil
 
@@ -61,13 +62,31 @@ with open(sys.argv[1],"r") as f:
         i=i+1
 #print ("this many lines"+str(i)+"\n")
 found = 0
+elength=0
 
 with open(sys.argv[1]) as f:
     for r in f:
       if found ==0:
-        if re.search(sea, r) is not None:
+        regexd=re.search(sea, r)
+        if regexd is not None:
+            print(re.search(sea, r))
             found=2;
             print ("Found Z - search\n")
+            if regexd:
+               # startline = regexd.group(1)
+                print("was\n" +r)
+                print(regexd.group(0))
+      esearch=re.search("E([\d\.]+)", r)
+      if (elength==0 and esearch is not None):
+        elength=1
+        print("found esearch")
+        print(esearch.group(0))
+        StartLength=(esearch.group(0))
+            # string.split('E')[-1]
+        newi=float(StartLength[1:]) - 0.003
+        print("new Start Length" + str(newi) +"\n")
+
+
       if found==2:
         found=1
         print ("Found Z - Setting Up GCode\n")
@@ -79,7 +98,7 @@ with open(sys.argv[1]) as f:
         out.write("M109 S"+str(extruderTemp)+"\n")
         out.write("G1 Y40 x20 F1000")
         out.write("G0 F3000 Z"+str((float(height)+4)))
-        #So IT IS CRUCIAL you DELETE G92 E0 (line 9 in the above picture) and instead place G92 EXXXXXXXX where XXXXXXX is, in our case, the value the print "aborted", 8027.82489. Just in case, i deducted one unit and wrote 8027.82488.
+        out.write("G92 " + str(newi))
       #  out.write("G90")
         out.write(";Resume Print - Code\n")
         out.write(r)
