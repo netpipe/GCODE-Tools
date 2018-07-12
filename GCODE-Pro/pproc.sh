@@ -46,18 +46,18 @@ fi
 
 
 
-if [ $btweakatz ]
+if [ $btweakatz -eq 1 ]
 then
 python "$dir/tweakatz-repetier2.py" $1
 fi
 
-if [ $bmusicPrint ]
+if [ $bmusicPrint -eq 1 ]
 then
 #python "$dir/RTTTL2GCODE2.py" $1
 python "$dir/musicalPrint.py" $1
 fi
 
-if [ $brecover ]
+if [ $brecover -eq 1 ]
 then
     python "$dir/resume-printZ.py" $1 $szAnswer
 fi
