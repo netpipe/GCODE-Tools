@@ -63,6 +63,7 @@ with open(sys.argv[1],"r") as f:
 #print ("this many lines"+str(i)+"\n")
 found = 0
 elength=0
+newi=0
 
 with open(sys.argv[1]) as f:
     for r in f:
@@ -97,8 +98,8 @@ with open(sys.argv[1]) as f:
         out.write("M190 S"+str(bedTemp)+"\n")
         out.write("M109 S"+str(extruderTemp)+"\n")
         out.write("G1 Y40 x20 F1000")
-        out.write("G0 F3000 Z"+str((float(height)+4)))
-        out.write("G92 " + str(newi))
+        out.write("G0 F3000 Z"+str((float(height)+4))+ "\n")
+        out.write("G92 " + str(newi) + "\n")
       #  out.write("G90")
         out.write(";Resume Print - Code\n")
         out.write(r)
