@@ -10,6 +10,7 @@
 #
 #use M114 to find Z if its in the proper spot still
 
+#guide used for this http://www.print3dforum.com/showthread.php/280-GUIDE-How-to-resume-an-interrupted-(abruptly!)-3D-Print
 
 
 #
@@ -78,6 +79,7 @@ with open(sys.argv[1]) as f:
         out.write("M109 S"+str(extruderTemp)+"\n")
         out.write("G1 Y40 x20 F1000")
         out.write("G0 F3000 Z"+str((float(height)+4)))
+        #So IT IS CRUCIAL you DELETE G92 E0 (line 9 in the above picture) and instead place G92 EXXXXXXXX where XXXXXXX is, in our case, the value the print "aborted", 8027.82489. Just in case, i deducted one unit and wrote 8027.82488.
       #  out.write("G90")
         out.write(";Resume Print - Code\n")
         out.write(r)
