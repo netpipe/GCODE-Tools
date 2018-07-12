@@ -8,6 +8,7 @@ dir=$(dirname "$0")
 btweakatz=0
 bmusicPrint=0
 brecover=0
+szAnswer=0
 
 sleep .1 && wmctrl -a Information -b add,above &
 WINDOWID=$(xwininfo -root -int | awk '/xwininfo:/{print $4}') \
