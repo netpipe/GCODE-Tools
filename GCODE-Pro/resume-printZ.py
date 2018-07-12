@@ -103,6 +103,15 @@ with open(sys.argv[1]) as f:
         out.write(";Resume Print - Code\n")
         out.write(r)
       if found==1:
+        if (elength==0 and esearch is not None):
+            elength=1
+            print("found esearch")
+            print(esearch.group(0))
+            StartLength=(esearch.group(0))
+            # string.split('E')[-1]
+            newi=float(StartLength[1:]) - 0.003
+            print("new Start Length" + str(newi) +"\n")
+
         out.write(r)
         
 
