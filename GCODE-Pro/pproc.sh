@@ -28,17 +28,17 @@ stweakatz=$(echo $hello| cut -d "|" -f1)
 smusicPrint=$(echo $hello| cut -d "|" -f2)
 sRecover=$(echo $hello| cut -d "|" -f3)
 
-if (( $stweakatz == "TweakAtZ" ))
+if [[ $stweakatz == "TweakAtZ" ]]
     then
     btweakatz=1
 fi
 
-if (( $sRecover == "musicalPrint" ))
+if [[ $sRecover == "musicalPrint" ]]
     then
     bmusicPrint=1
 fi
 
-if (( $sRecover == "Recover-Print" ))
+if [[ $sRecover == "Recover-Print" ]]
     then
     brecover=1
     szAnswer=$(zenity --entry --text "what z position to start at" --entry-text "0"); echo $szAnswer
