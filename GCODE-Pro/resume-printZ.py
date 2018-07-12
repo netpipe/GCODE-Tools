@@ -8,6 +8,10 @@
 #
 # ChangeLog -  added % print v2
 #
+#use M114 to find Z if its in the proper spot still
+
+
+
 #
 
 import sys
@@ -59,7 +63,7 @@ found = 0
 
 with open(sys.argv[1]) as f:
     for r in f:
-      if found >=0:
+      if found ==0:
         if re.search(sea, r) is not None:
             found=2;
             print ("Found Z - search\n")
@@ -67,12 +71,14 @@ with open(sys.argv[1]) as f:
         found=1
         print ("Found Z - Setting Up GCode\n")
         out.write(";Resume Printing Heating\n")
-     #   out.write("G28 X0 Y0")
-     #   out.write("G1 Y40 x20 F1000")
-     #   out.write("M140 S"+str(bedTemp)+"\n")
-     #   out.write("M104 S"+str(extruderTemp)+"\n")
-     #   out.write("M190 S"+str(bedTemp)+"\n")
-     #   out.write("M109 S"+str(extruderTemp)+"\n")
+        out.write("G28 X0 Y0")
+        out.write("M140 S"+str(bedTemp)+"\n")
+        out.write("M104 S"+str(extruderTemp)+"\n")
+        out.write("M190 S"+str(bedTemp)+"\n")
+        out.write("M109 S"+str(extruderTemp)+"\n")
+        out.write("G1 Y40 x20 F1000")
+        out.write("G0 F3000 Z"+str((float(height)+4)))
+      #  out.write("G90")
         out.write(";Resume Print - Code\n")
         out.write(r)
       if found==1:
