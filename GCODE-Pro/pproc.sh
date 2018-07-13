@@ -54,8 +54,16 @@ fi
 
 if [ $bmusicPrint -eq 1 ]
 then
+file="t.mid";
+fname=$(echo $file| cut -d "." -f1)
+
+php midi2rtttl.php t.mid > "$fname.rtl"
+test="$fname:$(cat $fname.rtl | cut -d ':' -f2) : $(cat $fname.rtl | cut -d ':' -f3)"
+#test="test:$(cat test.txt | cut -d ":" -f2) : $(cat test.txt | cut -d ":" -f3)"
+echo $test > "$fname.rtl"
+
 #python "$dir/RTTTL2GCODE2.py" $1
-python "$dir/musicalPrint.py" $1
+python "$dir/musicalPrint.py" $1 "$fname.rtl"
 fi
 
 if [ $brecover -eq 1 ]

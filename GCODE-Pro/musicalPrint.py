@@ -9,6 +9,8 @@
 #todo
 #would like to have 
 
+#credits to http://mines.lumpylumpy.com for some of the ringtones. neat site too
+
 
 
 from __future__ import division
@@ -50,8 +52,8 @@ stairway="Led Zepelin-Stairway to Heaven:d=8,o=5,b=63:a4,c,e,a,b,e,c,b,c6,e,c,c6
 #
 #modify these
 #
-
-skiplines=7
+#3 is slowest     7 worked ok     8 is fastest 9 worked but toon was intermittant.
+skiplines=8
 testSong=re.sub(r"\.\d+", r".", stairway) #use this line to change the song to fix the decimal
 
 ############################################
