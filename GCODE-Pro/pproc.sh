@@ -2,7 +2,7 @@
 #Description: Launcher for Repetier-Host gcodes
 
 echo "Launching Scripts\n"
-dir=$(dirname "$0")
+dir=$(dirname "$0") # must be the script directory
 #cd dir
 
 btweakatz=0
@@ -58,12 +58,14 @@ fi
 if [ $bmusicPrint -eq 1 ]
 then
 file=$szSavePath
-#file="$dir/midi2rtttl/t.mid";
+echo "$file"
+#file="$PWD/midi2rtttl/t.mid";
 fname=$(basename $file | cut -d "." -f1 )
 fpath=$(dirname -- $file)
 fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
 #realpath
 #$(readlink -f $file)
+#fdir=$(dirname "$szSavePath")
 
     if [ "$(locate php)" != "" ]
     then
@@ -93,13 +95,12 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
                 if [ -e "$dir/midi2rtttl/$fname.mid" ]; #check if file exists use it instead
                 then
                     echo "file exists overwriting"
-                    "$dir/midi2rtttl/waon" -n 100 -c 50 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
-                    php "$dir/midi2rtttl/midi2rtttl.php" "$dir/midi2rtttl/$fname.mid" > "$dir/midi2rtttl/$fname.rtl"
-                    test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-                   # fname=""
+                  #  "$dir/midi2rtttl/waon" -n 100 -c 1 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
+                  #  php "$dir/midi2rtttl/midi2rtttl.php" "$dir/midi2rtttl/$fname.mid" > "$dir/midi2rtttl/$fname.rtl"
+                  #  test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+                   fname=""
                 else
-                    "$dir/midi2rtttl/waon" -n 100 -c 50 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
-                     # mfile=$wfile
+                    $dir/midi2rtttl/waon -r -5 -n 100 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
                     php "$dir/midi2rtttl/midi2rtttl.php" "$dir/midi2rtttl/$fname.mid" > "$dir/midi2rtttl/$fname.rtl"
                     test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
                 fi
