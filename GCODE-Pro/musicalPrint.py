@@ -51,9 +51,12 @@ finalcount="Final Countdown:d=16,o=5,b=125:b,a,4b,4e,4p,8p,c6,b,8c6,8b,4a,4p,8p,
 stairway="Led Zepelin-Stairway to Heaven:d=8,o=5,b=63:a4,c,e,a,b,e,c,b,c6,e,c,c6,f#,d,a4,f#,e.,16c,a4,4e,c,a4,e,g4,a4,4a4"
 #
 midif= sys.argv[2]
-with open(midif, 'r') as myfile:
-    data=myfile.read().replace('\n', '')
-print(data)
+if midif != "": #has a file otherwise pick a tune
+    with open(midif, 'r') as myfile:
+        data=myfile.read().replace('\n', '')
+    print(data)
+else:
+    data=MI
 
 #modify these
 #

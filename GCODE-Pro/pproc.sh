@@ -66,42 +66,45 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
 #$(readlink -f $file)
 
 
-if [ $fext == "mid" ];
-then
-    echo "MID found"
-    php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
-    test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-    echo $test > "$dir/midi2rtttl/$fname.rtl"
-fi
+    if [ "$fext" == "mid" ];
+    then
+        echo "MID found"
+        php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
+        test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+        echo $test > "$dir/midi2rtttl/$fname.rtl"
+    fi
 
-if [ $fext == "rtl" ];
-then
-  #  php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
- #   test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-  #  echo $test > "$dir/midi2rtttl/$fname.rtl"
-    echo "test"
-fi
+    if [ "$fext" == "rtl" ];
+    then
+      #  php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
+     #   test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+      #  echo $test > "$dir/midi2rtttl/$fname.rtl"
+        echo "test"
+    fi
 
-if [ $fext == "wav" ] #test extension for mid if not then make one
-then
-    ./midi2rtttl/waon -i $1 -o $fname.mid
-   # mfile=$wfile
-    php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
-    test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-    echo $test > "$dir/midi2rtttl/$fname.rtl"
+    if [ "$fext" == "wav" ] #test extension for mid if not then make one
+    then
+        ./midi2rtttl/waon -i $1 -o $fname.mid
+       # mfile=$wfile
+        php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
+        test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+        echo $test > "$dir/midi2rtttl/$fname.rtl"
 
-fi
+    fi
 
 #./midi2rtttl/run.sh $1 $szAnswer2
 
-#python "$dir/RTTTL2GCODE2.py" $1
-python "$dir/musicalPrint.py" $1 "$dir/midi2rtttl/$fname.rtl"
 
-
+    if [ "$fname" != "" ]
+    then
+        python "$dir/musicalPrint.py" $1 "$dir/midi2rtttl/$fname.rtl"
+    else
+        python "$dir/musicalPrint.py" $1 ""
+    fi
 fi
 
-if [ $brecover -eq 1 ]
-then
-    python "$dir/resume-printZ.py" $1 $szAnswer
-fi
+    if [ $brecover -eq 1 ]
+    then
+        python "$dir/resume-printZ.py" $1 $szAnswer
+    fi
 
