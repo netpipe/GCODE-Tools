@@ -65,49 +65,66 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
 #realpath
 #$(readlink -f $file)
 
-
-    if [ "$fext" == "mid" ];
+    if [ "$(locate php)" != "" ]
     then
-        echo "MID found"
-        php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
-        test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-        echo $test > "$dir/midi2rtttl/$fname.rtl"
-    fi
+        echo "found php continuing"        
+        
 
-    if [ "$fext" == "rtl" ];
-    then
-      #  php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
-     #   test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-      #  echo $test > "$dir/midi2rtttl/$fname.rtl"
-        echo "test"
-    fi
-
-    if [ "$fext" == "wav" ] #test extension for mid if not then make one
-    then
-        if [ -e "$dir/midi2rtttl/waon" ]; 
+        if [ "$fext" == "mid" ];
         then
-            "$dir/midi2rtttl/waon" -i $file -o $fname.mid
-             # mfile=$wfile
+            echo "MID found"
             php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
             test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-        echo $test > "$dir/midi2rtttl/$fname.rtl"
-        else
-            echo "compile waon"
-            $fname=""
+            echo $test > "$dir/midi2rtttl/$fname.rtl"
         fi
 
+        if [ "$fext" == "rtl" ];
+        then
+          #  php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
+         #   test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+          #  echo $test > "$dir/midi2rtttl/$fname.rtl"
+            echo "test"
+        fi
+
+        if [ "$fext" == "wav" ] #test extension for mid if not then make one
+        then
+            if [ -e "$dir/midi2rtttl/waon" ]; 
+            then
+                if [ -e "$dir/midi2rtttl/$fname.mid" ]; #check if file exists use it instead
+                then
+                    echo "file exists overwriting"
+                    "$dir/midi2rtttl/waon" -n 100 -c 50 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
+                    php "$dir/midi2rtttl/midi2rtttl.php" "$dir/midi2rtttl/$fname.mid" > "$dir/midi2rtttl/$fname.rtl"
+                    test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+                   # fname=""
+                else
+                    "$dir/midi2rtttl/waon" -n 100 -c 50 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
+                     # mfile=$wfile
+                    php "$dir/midi2rtttl/midi2rtttl.php" "$dir/midi2rtttl/$fname.mid" > "$dir/midi2rtttl/$fname.rtl"
+                    test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+                fi
+
+            echo $test > "$dir/midi2rtttl/$fname.rtl"
+            else
+                echo "compile waon"
+                $fname=""
+            fi
 
 
-    fi
 
-#./midi2rtttl/run.sh $1 $szAnswer2
+        fi
+
+    #./midi2rtttl/run.sh $1 $szAnswer2
 
 
-    if [ "$fname" != "" ]
-    then
-        python "$dir/musicalPrint.py" $1 "$dir/midi2rtttl/$fname.rtl"
+        if [ "$fname" != "" ]
+        then
+            python "$dir/musicalPrint.py" $1 "$dir/midi2rtttl/$fname.rtl"
+        else
+            python "$dir/musicalPrint.py" $1 ""
+        fi
     else
-        python "$dir/musicalPrint.py" $1 ""
+        echo "no php cannot use this feature"
     fi
 fi
 
