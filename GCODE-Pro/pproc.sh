@@ -115,7 +115,7 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
                         $dir/midi2rtttl/waon -n 1000 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
                         midi2rtttl "$dir/midi2rtttl/$fname.mid"
 
-                   if [ 1 == 1 ] #run it through for second pass or back to midi file for testinng.
+                   if [ 0 == 1 ] #run it through for second pass or back to midi file for testinng.
                    then
                     python "$dir/midi2rtttl/rtttlMaker.py" midi -i "$dir/midi2rtttl/$fname.rtl" -o "$fname.mid"
                     timidity "$fname.mid" -Ow -o "$fname.wav"
