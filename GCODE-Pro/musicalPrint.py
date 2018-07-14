@@ -50,11 +50,16 @@ axel="Axel:d=8,o=5,b=125:16g,16g,a#.,16g,16p,16g,c6,g,f,4g,d.6,16g,16p,16g,d#6,d
 finalcount="Final Countdown:d=16,o=5,b=125:b,a,4b,4e,4p,8p,c6,b,8c6,8b,4a,4p,8p,c6,b,4c6,4e,4p,8p,a,g,8a,8g,8f#,8a,4g.,f#,g,4a.,g,a,8b,8a,8g,8f#,4e,4c6,2b.,b,c6,b,a,1b"
 stairway="Led Zepelin-Stairway to Heaven:d=8,o=5,b=63:a4,c,e,a,b,e,c,b,c6,e,c,c6,f#,d,a4,f#,e.,16c,a4,4e,c,a4,e,g4,a4,4a4"
 #
+midif= sys.argv[2]
+with open(midif, 'r') as myfile:
+    data=myfile.read().replace('\n', '')
+print(data)
+
 #modify these
 #
 #3 is slowest     7 worked ok     8 is fastest 9 worked but toon was intermittant.
 skiplines=8
-testSong=re.sub(r"\.\d+", r".", stairway) #use this line to change the song to fix the decimal
+testSong=re.sub(r"\.\d+", r".", data) #use this line to change the song to fix the decimal
 
 ############################################
 

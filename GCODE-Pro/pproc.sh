@@ -35,13 +35,16 @@ fi
 
 if [[ $smusicPrint == "musicalPrint" ]]
     then
+   # szAnswer2=$(zenity --entry --text "select file midi,wav,rtl file" --entry-text "$dir"); 
+    szSavePath=$(zenity --file-selection --save);echo $szSavePath
     bmusicPrint=1
 fi
 
 if [[ $sRecover == "Recover-Print" ]]
     then
     brecover=1
-    szAnswer=$(zenity --entry --text "what z position to start at" --entry-text "0"); echo $szAnswer
+    szAnswer=$(zenity --entry --text "what z position to start at" --entry-text "0");
+    echo $szAnswer
 #try searching for it or close match
 fi
 
@@ -54,16 +57,47 @@ fi
 
 if [ $bmusicPrint -eq 1 ]
 then
-file="t.mid";
-fname=$(echo $file| cut -d "." -f1)
+file=$szSavePath
+#file="$dir/midi2rtttl/t.mid";
+fname=$(basename $file | cut -d "." -f1 )
+fpath=$(dirname -- $file)
+fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
+#realpath
+#$(readlink -f $file)
 
-php midi2rtttl.php t.mid > "$fname.rtl"
-test="$fname:$(cat $fname.rtl | cut -d ':' -f2) : $(cat $fname.rtl | cut -d ':' -f3)"
-#test="test:$(cat test.txt | cut -d ":" -f2) : $(cat test.txt | cut -d ":" -f3)"
-echo $test > "$fname.rtl"
+
+if [ $fext == "mid" ];
+then
+    echo "MID found"
+    php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
+    test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+    echo $test > "$dir/midi2rtttl/$fname.rtl"
+fi
+
+if [ $fext == "rtl" ];
+then
+  #  php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
+ #   test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+  #  echo $test > "$dir/midi2rtttl/$fname.rtl"
+    echo "test"
+fi
+
+if [ $fext == "wav" ] #test extension for mid if not then make one
+then
+    ./midi2rtttl/waon -i $1 -o $fname.mid
+   # mfile=$wfile
+    php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
+    test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+    echo $test > "$dir/midi2rtttl/$fname.rtl"
+
+fi
+
+#./midi2rtttl/run.sh $1 $szAnswer2
 
 #python "$dir/RTTTL2GCODE2.py" $1
-python "$dir/musicalPrint.py" $1 "$fname.rtl"
+python "$dir/musicalPrint.py" $1 "$dir/midi2rtttl/$fname.rtl"
+
+
 fi
 
 if [ $brecover -eq 1 ]

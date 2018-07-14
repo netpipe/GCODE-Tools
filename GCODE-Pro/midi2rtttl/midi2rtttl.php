@@ -7,7 +7,7 @@ if ($argv!=''){
     $fname = $argv[1];  //t.mid";
     echo $argv[0];
     echo $argv[1];
-    $fhandle = fopen("./t.mid", "r") or die("Unable to open file!");
+    $fhandle = fopen("$fname", "r") or die("Unable to open file!");
    # $tmidi = fopen("test.txt", "r") or die("Unable to open file!");
     $content = fread($fhandle,filesize($fname));
 
