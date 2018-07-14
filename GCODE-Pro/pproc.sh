@@ -84,11 +84,19 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
 
     if [ "$fext" == "wav" ] #test extension for mid if not then make one
     then
-        $dir/midi2rtttl/waon -i $(basename $file) -o $fname.mid
-       # mfile=$wfile
-        php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
-        test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
+        if [ -e "$dir/midi2rtttl/waon" ]; 
+        then
+            "$dir/midi2rtttl/waon" -i $file -o $fname.mid
+             # mfile=$wfile
+            php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
+            test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
         echo $test > "$dir/midi2rtttl/$fname.rtl"
+        else
+            echo "compile waon"
+            $fname=""
+        fi
+
+
 
     fi
 
