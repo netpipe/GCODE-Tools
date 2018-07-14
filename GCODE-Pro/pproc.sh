@@ -52,7 +52,7 @@ fi
 
 if [ $btweakatz -eq 1 ]
 then
-python "$dir/tweakatz-repetier2.py" $1
+    python "$dir/tweakatz-repetier2.py" $1
 fi
 
 if [ $bmusicPrint -eq 1 ]
@@ -84,7 +84,7 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
 
     if [ "$fext" == "wav" ] #test extension for mid if not then make one
     then
-        ./midi2rtttl/waon -i $1 -o $fname.mid
+        $dir/midi2rtttl/waon -i $(basename $file) -o $fname.mid
        # mfile=$wfile
         php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
         test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
@@ -103,8 +103,8 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
     fi
 fi
 
-    if [ $brecover -eq 1 ]
-    then
-        python "$dir/resume-printZ.py" $1 $szAnswer
-    fi
+if [ $brecover -eq 1 ]
+then
+    python "$dir/resume-printZ.py" $1 $szAnswer
+fi
 
