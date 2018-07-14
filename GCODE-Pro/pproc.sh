@@ -112,7 +112,7 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
                         #midi2rtttl "$file"
                    # else
                         $dir/midi2rtttl/waon -n 1000 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
-                        midi2rtttl "$file" 
+                        midi2rtttl "$dir/midi2rtttl/$fname.mid"
                     #fi
 
             fi
@@ -127,13 +127,14 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
 
             if [ "$fext" == "mp3" ] #test extension for mid if not then make one
             then
+                    #try using convert too ?
                  echo "decoding mp3 file"
                     if [ "$(locate ffmpeg)" != "" ]
                     then
                         ffmpeg -i "$file" "$dir/midi2rtttl/$fname.wav"
-                    #elif [ "$(locate mpg123)" != "" ]
-                   # then
-                   #     mpg123 -w "fname".wav "$dir/midi2rtttl/$fname".mp3
+                    elif [ "$(locate mpg123)" != "" ]
+                    then
+                        mpg123 -w "fname".wav "$dir/midi2rtttl/$fname".mp3
                     fi
                         $dir/midi2rtttl/waon -n 1000 -i "$dir/midi2rtttl/$fname.wav" -o "$dir/midi2rtttl/$fname.mid"
                         midi2rtttl "$dir/midi2rtttl/$fname.mid"
