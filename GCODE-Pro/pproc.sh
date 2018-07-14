@@ -150,12 +150,14 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
                         #"$fpath/$fname.wav"
             fi
 
-
-
+            if [ "$fext" != "" ]
+            then
+            fname=""
+            fi
         #./midi2rtttl/run.sh $1 $szAnswer2
 
         else
-            echo "no waon"
+            echo "no waon - please compile or install the midi converter or choose one. wav2mid might work too."
         fi
 
         if [ "$fname" != "" ]
