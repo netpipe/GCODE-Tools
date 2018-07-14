@@ -92,18 +92,18 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
         then
             if [ -e "$dir/midi2rtttl/waon" ]; 
             then
-                if [ -e "$dir/midi2rtttl/$fname.mid" ]; #check if file exists use it instead
-                then
+              #  if [ -e "$dir/midi2rtttl/$fname.mid" ]; #check if file exists use it instead
+              #  then
                     echo "file exists overwriting"
                   #  "$dir/midi2rtttl/waon" -n 100 -c 1 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
                   #  php "$dir/midi2rtttl/midi2rtttl.php" "$dir/midi2rtttl/$fname.mid" > "$dir/midi2rtttl/$fname.rtl"
                   #  test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-                   fname=""
-                else
-                    $dir/midi2rtttl/waon -r -5 -n 100 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
+                  # fname="$fname"
+               # else
+                    $dir/midi2rtttl/waon -r 50 -n 1000 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
                     php "$dir/midi2rtttl/midi2rtttl.php" "$dir/midi2rtttl/$fname.mid" > "$dir/midi2rtttl/$fname.rtl"
                     test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-                fi
+                #fi
 
             echo $test > "$dir/midi2rtttl/$fname.rtl"
             else
