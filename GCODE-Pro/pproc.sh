@@ -9,6 +9,22 @@ btweakatz=0
 bmusicPrint=0
 brecover=0
 szAnswer=0
+test=""
+sfile=""
+
+midi2rtttl () {
+                    echo "calling midi2rttl function"
+                    ftname=$(basename "$1" | cut -d "." -f1 )
+                    ftpath=$(dirname -- "$1")
+                    #fext="${1##*.}"
+                    echo "function args are $1\n"
+                    echo "ftpath and name are $ftpath / $ftname\n"
+
+                   # $dir/midi2rtttl/waon -n 1000 -i "$1" -o "$dir/midi2rtttl/$fname.mid"
+                    php "$dir/midi2rtttl/midi2rtttl.php" "$1" > "$dir/midi2rtttl/$ftname.rtl"
+                    test="$ftname:$(cat $dir/midi2rtttl/$ftname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$ftname.rtl | cut -d ':' -f3)"
+                    echo $test > "$dir/midi2rtttl/$ftname.rtl"
+}
 
 sleep .1 && wmctrl -a Information -b add,above &
 WINDOWID=$(xwininfo -root -int | awk '/xwininfo:/{print $4}') \
@@ -69,61 +85,76 @@ fext="${file##*.}"; #$(basename $file | cut -d "." -f2 )
 
     if [ "$(locate php)" != "" ]
     then
-        echo "found php continuing"        
+        echo "found php continuing"
         
-
         if [ "$fext" == "mid" ];
         then
             echo "MID found"
-            php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
-            test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-            echo $test > "$dir/midi2rtttl/$fname.rtl"
+            midi2rtttl "$file" 
         fi
 
         if [ "$fext" == "rtl" ];
         then
-          #  php "$dir/midi2rtttl/midi2rtttl.php" $file > "$dir/midi2rtttl/$fname.rtl"
-         #   test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-          #  echo $test > "$dir/midi2rtttl/$fname.rtl"
+            echo "decoding rtl file"
+            midi2rtttl "$file" 
             echo "test"
         fi
 
-        if [ "$fext" == "wav" ] #test extension for mid if not then make one
+        if [ -e "$dir/midi2rtttl/waon" ]; 
         then
-            if [ -e "$dir/midi2rtttl/waon" ]; 
-            then
-              #  if [ -e "$dir/midi2rtttl/$fname.mid" ]; #check if file exists use it instead
-              #  then
-                    echo "file exists overwriting"
-                  #  "$dir/midi2rtttl/waon" -n 100 -c 1 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
-                  #  php "$dir/midi2rtttl/midi2rtttl.php" "$dir/midi2rtttl/$fname.mid" > "$dir/midi2rtttl/$fname.rtl"
-                  #  test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-                  # fname="$fname"
-               # else
-                    $dir/midi2rtttl/waon -r 50 -n 1000 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
-                    php "$dir/midi2rtttl/midi2rtttl.php" "$dir/midi2rtttl/$fname.mid" > "$dir/midi2rtttl/$fname.rtl"
-                    test="$fname:$(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f2) : $(cat $dir/midi2rtttl/$fname.rtl | cut -d ':' -f3)"
-                #fi
+        echo "found waon"
 
-            echo $test > "$dir/midi2rtttl/$fname.rtl"
-            else
-                echo "compile waon"
-                $fname=""
+            if [ "$fext" == "wav" ] #test extension for mid if not then make one
+            then
+                        echo "decoding wav file"
+                  #  if [ -e "$dir/midi2rtttl/$fname.mid" ]; #check if file exists use it instead
+                  #  then
+                        #midi2rtttl "$file"
+                   # else
+                        $dir/midi2rtttl/waon -n 1000 -i "$file" -o "$dir/midi2rtttl/$fname.mid"
+                        midi2rtttl "$file" 
+                    #fi
+
+            fi
+
+            if [ "$fext" == "ogg" ] #test extension for mid if not then make one
+            then
+                        echo "decoding ogg file"
+                        oggdec "$file" -o "$dir/midi2rtttl/$fname.wav"
+                        $dir/midi2rtttl/waon -n 1000 -i "$dir/midi2rtttl/$fname.wav" -o "$dir/midi2rtttl/$fname.mid"
+                        midi2rtttl "$dir/midi2rtttl/$fname.mid" 
+            fi
+
+            if [ "$fext" == "mp3" ] #test extension for mid if not then make one
+            then
+                 echo "decoding mp3 file"
+                    if [ "$(locate ffmpeg)" != "" ]
+                    then
+                        ffmpeg -i "$file" "$dir/midi2rtttl/$fname.wav"
+                    #elif [ "$(locate mpg123)" != "" ]
+                   # then
+                   #     mpg123 -w "fname".wav "$dir/midi2rtttl/$fname".mp3
+                    fi
+                        $dir/midi2rtttl/waon -n 1000 -i "$dir/midi2rtttl/$fname.wav" -o "$dir/midi2rtttl/$fname.mid"
+                        midi2rtttl "$dir/midi2rtttl/$fname.mid"
+                        #"$fpath/$fname.wav"
             fi
 
 
 
+        #./midi2rtttl/run.sh $1 $szAnswer2
+
+        else
+            echo "no waon"
         fi
-
-    #./midi2rtttl/run.sh $1 $szAnswer2
-
 
         if [ "$fname" != "" ]
         then
-            python "$dir/musicalPrint.py" $1 "$dir/midi2rtttl/$fname.rtl"
+                python "$dir/musicalPrint.py" $1 "$dir/midi2rtttl/$fname.rtl"
         else
-            python "$dir/musicalPrint.py" $1 ""
+                python "$dir/musicalPrint.py" $1 ""
         fi
+
     else
         echo "no php cannot use this feature"
     fi
