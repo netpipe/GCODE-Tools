@@ -23,20 +23,45 @@ from itertools import tee, izip
 #string0="xterm -e "+ os.getenv("HOME") + '/.cura/plugins/GCODE-Tools/GCODE-Pro/pproc.sh ' + filename
 print "current directory is " + os.getcwd()
 print "filename is " + filename + "\n"
+if 1 == 1:
+    out = open(os.getenv("HOME") + "/.cura/plugins/test", 'w')
 
+    with open(os.getenv("HOME") + '/.cura/plugins/test') as f:
+        for r in f:
+            if r == "":
+                print("no gcode file string")
+                out.write(sys.argv[1])
+            else:
+                print('setting file')
+                file=r
+
+i=0
 #print ("test"+os.getenv("HOME") )
 with open( os.getenv("HOME") + "/.cura/plugins/ready","r") as f:
     for r in f:
-        print("ready is " + r )
-        if int(r) == "1": #if ready
-            print ("Ready - launching pproc")
-            os.system("xterm -e "+ os.getenv("HOME") + '/.cura/plugins/GCODE-Tools/GCODE-Pro/pproc.sh ' + filename)
+        if[ i == "0" ]: #only one loop to read ready state
+            i = "1" 
+            print("ready is " + r )
+            print(int(r) )
+            if r == "1": #if ready
+            #if os.stat( os.getenv("HOME") + "/.cura/plugins/ready").st_size == 0:
+                print ("Ready - launching pproc")
+                os.system("xterm -e "+ os.getenv("HOME") + '/.cura/plugins/GCODE-Tools/GCODE-Pro/pproc.sh ' + filename)
+            #write filename as ""
+                
+            else:
+                print ("ready file was bool 0")
+                os.system("gedit " + filename)
+                button="xterm -e \"python " + os.getenv("HOME") + '/.cura/plugins/GCODE-Tools/GCODE-Pro/cura-button.py ' + filename + "\"&"
+                print("launching " + button)
+                os.system(button )
+                #os.system('xterm -e "python ' + os.getenv("HOME") + '/.cura/plugins/GCODE-Tools/GCODE-Pro/cura-ready-button.py "')
+                #os.system("xterm -e 'mate-calculator'&")
             
-        else:
-            print ("ready file was bool 0")
-            os.system("xterm -e \"python " + os.getenv("HOME") + '/.cura/plugins/GCODE-Tools/GCODE-Pro/cura-ready-button.py ' + filename + "\"&" )
-            #os.system('xterm -e "python ' + os.getenv("HOME") + '/.cura/plugins/GCODE-Tools/GCODE-Pro/cura-ready-button.py "')
-            #os.system("xterm -e 'mate-calculator'&")
+
+#with open( os.getenv("HOME") + "/.cura/plugins/ready","r") as f:
+#    for r in f:
+#        os.getenv("HOME") + '/.cura/plugins/test'
 
         
 #os.system("xterm -e 'mate-calculator'&")

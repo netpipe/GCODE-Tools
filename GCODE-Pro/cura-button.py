@@ -1,15 +1,51 @@
 from gi.repository import Gtk
-import os
 
+import re
+import math
+import os
+import sys
+
+#from itertools import tee, izip
 
 #check for tmp file location
 
 #sea = re.compile("Z"+str(height)+"*")
-file=""
-#write it to os.getenv("HOME") + '/.cura/plugins
 
+file2=sys.argv[1] #""
+#write it to os.getenv("HOME") + '/.cura/plugins
+#out = open(sys.argv[1]+"_fixed", 'w')
+print (file2)
+print ("opening filename to store things in\n")
+
+
+
+#with open(filename, "r") as f:
+#	lines = f.readlines()
+out = open( os.getenv("HOME") + "/.cura/plugins/filename", 'w')
+#os.stat("file").st_size == 0
+print("write file2" + file2 )
+#out.write( file2+"\n" )
+
+
+
+name=os.getenv("HOME") + '/.cura/plugins/filename'
+print ( name )
+with open( name ) as f:
+        print("what")
+        for r in f:
+            print("what2")
+            if r == "":
+                print("no gcode file")
+                #out.write(sys.argv[1])
+            else:
+                print('setting file')
+                file=r
+                out.write( file2 )
         #regexd=re.search(sea, r)
         #if regexd is not None:
+        print("what3")
+        out.write(sys.argv[1])
+out.close()
 
 import fcntl, sys
 pid_file = os.getenv("HOME") + '/.cura/plugins/program.pid'
@@ -37,20 +73,15 @@ class MyDemoApp():
 
     def button_clicked(self, window):
         print 'Launching pproc!'
-        os.system("xterm -e "+ os.getenv("HOME") + '/.cura/plugins/GCODE-Tools/GCODE-Pro/pproc.sh ' + file)
+        print file2
+        os.system("xterm -e "+ os.getenv("HOME") + '/.cura/plugins/GCODE-Tools/GCODE-Pro/pproc.sh ' + file2)
+        #Gtk.main_quit()
 
     def destroy(self, window):
         Gtk.main_quit()
 
 def main():
-    with open(os.getenv("HOME") + '/.cura/plugins/test') as f:
-        for r in f:
-            if r == "":
-                print("no gcode file string")
-                r.write(sys.argv[1])
-            else:
-                print('setting file')
-                file=r
+                #out.write(sys.argv[1])
     app = MyDemoApp()
     Gtk.main()
 
