@@ -40,10 +40,53 @@ hello=$(zenity --list --checklist --title "Testing checkbox." --text "Checkbox t
 
 #hello=(${hello//|/ }); for (( element = 0 ; element < ${#hello[@]}; element++ )); do somethingTo ${hello[$element]}; done
 
+if [[ $(echo $hello | cut -d "|" -f1) == "TweakAtZ" ]]
+then
+echo "tweak at z checked"
 
-stweakatz=$(echo $hello| cut -d "|" -f1)
-smusicPrint=$(echo $hello| cut -d "|" -f2)
-sRecover=$(echo $hello| cut -d "|" -f3)
+fi
+
+if [[ $(echo $hello| cut -d "|" -f1) == "TweakAtZ" ]]
+then
+stweakatz="TweakAtZ" #$(echo $hello| cut -d "|" -f1);
+elif [[ $(echo $hello| cut -d "|" -f2) == "TweakAtZ" ]]
+then
+stweakatz="TweakAtZ" #$(echo $hello| cut -d "|" -f1);
+elif [[ $(echo $hello| cut -d "|" -f3) == "TweakAtZ" ]]
+        then
+stweakatz="TweakAtZ" #$(echo $hello| cut -d "|" -f1);
+fi
+
+if [[ $(echo $hello| cut -d "|" -f1) == "Recover-Print" ]]
+then
+sRecover="Recover-Print"
+elif [[ $(echo $hello| cut -d "|" -f2) == "Recover-Print" ]]
+then
+sRecover="Recover-Print"
+elif [[ $(echo $hello| cut -d "|" -f3) == "Recover-Print" ]]
+then
+sRecover="Recover-Print"
+fi
+
+if [[ $(echo $hello| cut -d "|" -f1) == "musicalPrint" ]]
+then
+smusicPrint="musicalPrint"
+elif [[ $(echo $hello| cut -d "|" -f2) == "musicalPrint" ]]
+then
+smusicPrint="musicalPrint"
+elif [[ $(echo $hello| cut -d "|" -f3) == "musicalPrint" ]]
+then
+smusicPrint="musicalPrint"
+fi
+
+#hello=$(echo "$stweakatz|$smusicPrint|$sRecover")
+#echo $hello
+#stweakatz=$(echo $hello| cut -d "|" -f1)
+#smusicPrint=$(echo $hello| cut -d "|" -f2)
+#sRecover=$(echo $hello| cut -d "|" -f3)
+
+
+echo "$stweakatz|$smusicPrint|$sRecover"
 
 if [[ $stweakatz == "TweakAtZ" ]]
     then
