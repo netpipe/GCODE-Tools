@@ -36,7 +36,7 @@ WINDOWID=$(xwininfo -root -int | awk '/xwininfo:/{print $4}') \
 #szSavePath=$(zenity --file-selection --save --confirm-overwrite);echo $szSavePath
 
 
-hello=$(zenity --list --checklist --title "Testing checkbox." --text "Checkbox test." --column "" --column "Nice" True TweakAtZ True musicalPrint False Recover-Print)
+hello=$(zenity --list --checklist --title "Testing checkbox." --text "Checkbox test." --column "" --column "Nice" True TweakAtZ False musicalPrint False Recover-Print)
 
 #hello=(${hello//|/ }); for (( element = 0 ; element < ${#hello[@]}; element++ )); do somethingTo ${hello[$element]}; done
 
@@ -47,6 +47,79 @@ sRecover=$(echo $hello| cut -d "|" -f3)
 
 if [[ $stweakatz == "TweakAtZ" ]]
     then
+
+
+    if [[ -e "$dir/atz.conf" ]]
+    then
+        #    if [[ $(cat atz.conf) == "" ]]
+        echo "TweakAtZ - found file settings"
+
+    else
+        echo "TweakAtZ - Creating Settings"
+        iiZBed=50
+        iiZhotend=255
+        iatZposition=2.24
+        iatZBed=50
+        iatZhotend=230
+        ifinish=80
+        echo "$iiZBed|$iiZhotend|$iatZposition|$iatZBed|$iatZhotend|$ifinish" > "$dir/atz.conf"
+    fi
+
+        atzform=$(cat "$dir/atz.conf")
+        iiZBed=$(echo $atzform| cut -d "|" -f1)
+        iiZhotend=$(echo $atzform| cut -d "|" -f2)
+        iatZposition=$(echo $atzform| cut -d "|" -f3)
+        iatZBed=$(echo $atzform| cut -d "|" -f4)
+        iatZhotend=$(echo $atzform| cut -d "|" -f5)
+        ifinish=$(echo $atzform| cut -d "|" -f6)
+
+        atzform=$(zenity --forms --title="TweakAtZ" --text="Settings" \
+       --add-entry="initial Bed Temperature- $iiZBed" \
+       --add-entry="initial Hotend Temperature- $iiZhotend"  \
+       --add-entry="atZ Height- $iatZposition"  \
+       --add-entry="atZ Bed Temperature- $iatZBed" \
+       --add-entry="atZ Hotend Temperature- $iatZhotend"  \
+       --add-entry="print % to turn off bed- $ifinish" \
+       --add-calendar="Time Stamp GCODE" )
+
+        #grab form values
+        iZBed=$(echo $atzform| cut -d "|" -f1)
+        iZhotend=$(echo $atzform| cut -d "|" -f2)
+        atZposition=$(echo $atzform| cut -d "|" -f3)
+        atZBed=$(echo $atzform| cut -d "|" -f4)
+        atZhotend=$(echo $atzform| cut -d "|" -f5)
+        finish=$(echo $atzform| cut -d "|" -f6)
+
+        #set old values if blank
+        if [[ $iZBed == "" ]]
+        then
+            iZBed=$iiZBed
+        fi
+        if [[ $iZhotend == "" ]]
+        then
+            iZhotend=$iiZhotend
+        fi
+        if [[    $atZposition == "" ]]
+        then
+            atZposition=$iatZposition
+        fi
+        if [[ $atZBed == "" ]]
+        then
+            atZBed=$iatZBed
+        fi
+        if [[  $atZhotend == "" ]]
+        then
+            atZhotend=$iatZhotend
+        fi
+        if [[  $finish == "" ]]
+        then
+            finish=$ifinish
+        fi
+    
+        echo "TweakAtZ - Saving Settings"
+        echo "$iZBed|$iZhotend|$atZposition|$atZBed|$atZhotend|$finish"
+        echo "$iZBed|$iZhotend|$atZposition|$atZBed|$atZhotend|$finish" > "$dir/atz.conf"
+
     btweakatz=1
 fi
 
@@ -69,7 +142,8 @@ fi
 
 if [ $btweakatz -eq 1 ]
 then
-    python "$dir/tweakatz-repetier2.py" $1
+    python "$dir/tweakatz-repetier3.py" $1 $iZBed $iZhotend $atZposition $atZBed $atZhotend $finish
+   # python "$dir/tweakatz-repetier2.py" $1 $atzform
 fi
 
 if [ $bmusicPrint -eq 1 ]
