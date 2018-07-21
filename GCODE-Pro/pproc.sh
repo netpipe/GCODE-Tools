@@ -5,6 +5,16 @@ echo "Launching Scripts\n"
 dir=$(dirname "$0") # must be the script directory
 #cd dir
 
+#update=0
+#echo "checking for updates " $update
+#if [[ $update == 1 ]]; #enable this for github updater.
+#then
+ #   pwd=$PWD
+ #   cd $dir
+ #   git pull
+  #  cd $pwd
+#fi
+
 btweakatz=0
 bmusicPrint=0
 brecover=0
