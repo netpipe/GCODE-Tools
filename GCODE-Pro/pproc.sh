@@ -142,6 +142,7 @@ fi
 
 if [ $btweakatz -eq 1 ]
 then
+    #    echo "$iZBed|$iZhotend|$atZposition|$atZBed|$atZhotend|$finish"
     python "$dir/tweakatz-repetier3.py" $1 $iZBed $iZhotend $atZposition $atZBed $atZhotend $finish
    # python "$dir/tweakatz-repetier2.py" $1 $atzform
 fi

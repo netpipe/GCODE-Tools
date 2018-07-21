@@ -37,12 +37,13 @@ else:
 
 #Temp At Z
 if sys.argv[4:]:
-    height=sys.argv[6]#2.24 #try and get a value that matches the layers you use otherwise it may not find it.
+    height=sys.argv[4]#2.24 #try and get a value that matches the layers you use otherwise it may not find it.
     sea = re.compile("Z"+str(height)+"*")
+    print("found argv for string height")
 else:
     height=2.24 #try and get a value that matches the layers you use otherwise it may not find it.
     sea = re.compile("Z"+str(height)+"*")
-
+    print("default height of 2.24" + str(height))
 
 if sys.argv[5:]:
     bedTemp=sys.argv[5]
@@ -64,7 +65,7 @@ if sys.argv[6:]:
 else:
     fpercent=0.80
 
-#print ("string to use"+str(ibedTemp) + str(iextruderTemp) + str(height) + str(bedTemp) + str(extruderTemp) + str(fpercent)+ "\n" )
+print ("string to use  bed:"+str(ibedTemp) + "iextruder:" + str(iextruderTemp) + "height:" + str(height) + "bedtemp:" + str(bedTemp) + "extruderTemp:" + str(extruderTemp) + "fpercent:" + str(fpercent)+ "\n" )
 
 
 
