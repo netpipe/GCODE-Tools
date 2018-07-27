@@ -46,48 +46,91 @@ WINDOWID=$(xwininfo -root -int | awk '/xwininfo:/{print $4}') \
 #szSavePath=$(zenity --file-selection --save --confirm-overwrite);echo $szSavePath
 
 
-hello=$(zenity --list --checklist --title "Testing checkbox." --text "Checkbox test." --column "" --column "Nice" True TweakAtZ False musicalPrint False Recover-Print)
 
 #hello=(${hello//|/ }); for (( element = 0 ; element < ${#hello[@]}; element++ )); do somethingTo ${hello[$element]}; done
+parseConfig () {
 
-if [[ $(echo $hello | cut -d "|" -f1) == "TweakAtZ" ]]
-then
-echo "tweak at z checked"
 
-fi
+    if [[ $(echo $1| cut -d "|" -f1) == "TweakAtZ" ]]
+    then
+    stweakatz="TweakAtZ" #$(echo $hello| cut -d "|" -f1);
+    elif [[ $(echo $1| cut -d "|" -f2) == "TweakAtZ" ]]
+    then
+    stweakatz="TweakAtZ" #$(echo $hello| cut -d "|" -f1);
+    elif [[ $(echo $1| cut -d "|" -f3) == "TweakAtZ" ]]
+    then
+    stweakatz="TweakAtZ" #$(echo $hello| cut -d "|" -f1);
+    else
+    stweakatz="" 
+    fi
 
-if [[ $(echo $hello| cut -d "|" -f1) == "TweakAtZ" ]]
-then
-stweakatz="TweakAtZ" #$(echo $hello| cut -d "|" -f1);
-elif [[ $(echo $hello| cut -d "|" -f2) == "TweakAtZ" ]]
-then
-stweakatz="TweakAtZ" #$(echo $hello| cut -d "|" -f1);
-elif [[ $(echo $hello| cut -d "|" -f3) == "TweakAtZ" ]]
+    if [[ $(echo $1| cut -d "|" -f1) == "Recover-Print" ]]
+    then
+    sRecover="Recover-Print"
+    elif [[ $(echo $1| cut -d "|" -f2) == "Recover-Print" ]]
+    then
+    sRecover="Recover-Print"
+    elif [[ $(echo $1| cut -d "|" -f3) == "Recover-Print" ]]
+    then
+    sRecover="Recover-Print"
+    else
+    sRecover=""
+    fi
+
+    if [[ $(echo $1| cut -d "|" -f1) == "musicalPrint" ]]
+    then
+    smusicPrint="musicalPrint"
+    elif [[ $(echo $1| cut -d "|" -f2) == "musicalPrint" ]]
+    then
+    smusicPrint="musicalPrint"
+    elif [[ $(echo $1| cut -d "|" -f3) == "musicalPrint" ]]
+    then
+    smusicPrint="musicalPrint"
+    else
+    smusicPrint=""
+    fi
+
+}
+
+
+        bstweakatz="True"
+        bsRecover="False"
+        bsmusicPrint="False"
+
+
+    if [[ -e "$dir/pproc.conf" ]]
+    then
+     hello=$(cat "$dir/pproc.conf")
+     parseConfig $hello
+
+
+        bstweakatz="True"
+        bsRecover="False"
+        bsmusicPrint="True"
+
+        if [[ $stweakatz == "" ]]
         then
-stweakatz="TweakAtZ" #$(echo $hello| cut -d "|" -f1);
-fi
+        echo $stweakatz
+        bstweakatz="False"
+        fi
+        if [[ $sRecover == "" ]]
+        then
+        echo $sRecover
+        bsRecover="False"
+        fi
+        if [[ $smusicPrint == "" ]]
+        then
+        echo $smusicPrint
+        bsmusicPrint="False"
+        fi
+    fi
 
-if [[ $(echo $hello| cut -d "|" -f1) == "Recover-Print" ]]
-then
-sRecover="Recover-Print"
-elif [[ $(echo $hello| cut -d "|" -f2) == "Recover-Print" ]]
-then
-sRecover="Recover-Print"
-elif [[ $(echo $hello| cut -d "|" -f3) == "Recover-Print" ]]
-then
-sRecover="Recover-Print"
-fi
+hello=$(zenity --list --checklist --title "Testing checkbox." --text "Checkbox test." --column "" --column "Nice" $bstweakatz TweakAtZ $bsmusicPrint musicalPrint $bsRecover Recover-Print)
 
-if [[ $(echo $hello| cut -d "|" -f1) == "musicalPrint" ]]
-then
-smusicPrint="musicalPrint"
-elif [[ $(echo $hello| cut -d "|" -f2) == "musicalPrint" ]]
-then
-smusicPrint="musicalPrint"
-elif [[ $(echo $hello| cut -d "|" -f3) == "musicalPrint" ]]
-then
-smusicPrint="musicalPrint"
-fi
+parseConfig $hello
+
+#save config
+echo "$stweakatz|$smusicPrint|$sRecover" > "$dir/pproc.conf"
 
 #hello=$(echo "$stweakatz|$smusicPrint|$sRecover")
 #echo $hello
@@ -185,9 +228,14 @@ fi
 
 if [[ $sRecover == "Recover-Print" ]]
     then
-    brecover=1
     szAnswer=$(zenity --entry --text "what z position to start at" --entry-text "0");
+    if [[szAnswer != "0" ]]
+    then
+    brecover=1
+    echo "valid height found" # parse to see or do it in python script?
     echo $szAnswer
+    fi
+
 #try searching for it or close match
 fi
 
