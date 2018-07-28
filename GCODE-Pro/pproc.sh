@@ -125,9 +125,27 @@ parseConfig () {
         fi
     fi
 
-hello=$(zenity --list --checklist --title "Testing checkbox." --text "Checkbox test." --column "" --column "Nice" $bstweakatz TweakAtZ $bsmusicPrint musicalPrint $bsRecover Recover-Print)
+bconf="False"
+hello=$(zenity --list --checklist --title "Testing checkbox." --text "Checkbox test." --column "" --column "Nice" $bstweakatz TweakAtZ $bsmusicPrint musicalPrint $bsRecover Recover-Print $bconf Config )
 
 parseConfig $hello
+
+    if [[ $(echo $hello| cut -d "|" -f1) == "Config" ]]
+    then
+    bconf="True"
+    elif [[ $(echo $hello| cut -d "|" -f2) == "Config" ]]
+    then
+    bconf="True"
+    elif [[ $(echo $hello| cut -d "|" -f3) == "Config" ]]
+    then
+    bconf="True"
+    elif [[ $(echo $hello| cut -d "|" -f4) == "Config" ]]
+    then
+    bconf="True"
+    else
+    bconf="False"
+    fi
+
 
 #save config
 echo "$stweakatz|$smusicPrint|$sRecover" > "$dir/pproc.conf"
@@ -138,12 +156,7 @@ echo "$stweakatz|$smusicPrint|$sRecover" > "$dir/pproc.conf"
 #smusicPrint=$(echo $hello| cut -d "|" -f2)
 #sRecover=$(echo $hello| cut -d "|" -f3)
 
-
-echo "$stweakatz|$smusicPrint|$sRecover"
-
-if [[ $stweakatz == "TweakAtZ" ]]
-    then
-
+tweakatzConfig(){
 
     if [[ -e "$dir/atz.conf" ]]
     then
@@ -169,6 +182,9 @@ if [[ $stweakatz == "TweakAtZ" ]]
         iatZhotend=$(echo $atzform| cut -d "|" -f5)
         ifinish=$(echo $atzform| cut -d "|" -f6)
 
+    if [[ $1 == "config" ]]
+    then
+        echo "config values"
         atzform=$(zenity --forms --title="TweakAtZ" --text="Settings" \
        --add-entry="initial Bed Temperature- $iiZBed" \
        --add-entry="initial Hotend Temperature- $iiZhotend"  \
@@ -177,7 +193,7 @@ if [[ $stweakatz == "TweakAtZ" ]]
        --add-entry="atZ Hotend Temperature- $iatZhotend"  \
        --add-entry="print % to turn off bed- $ifinish" \
        --add-calendar="Time Stamp GCODE" )
-
+    fi
         #grab form values
         iZBed=$(echo $atzform| cut -d "|" -f1)
         iZhotend=$(echo $atzform| cut -d "|" -f2)
@@ -216,10 +232,33 @@ if [[ $stweakatz == "TweakAtZ" ]]
         echo "$iZBed|$iZhotend|$atZposition|$atZBed|$atZhotend|$finish"
         echo "$iZBed|$iZhotend|$atZposition|$atZBed|$atZhotend|$finish" > "$dir/atz.conf"
 
-    btweakatz=1
+   # btweakatz=1
+}
+
+
+
+echo "$stweakatz|$smusicPrint|$sRecover"
+
+if [[ $bconf == "False" ]]
+then
+    if [[ $stweakatz == "TweakAtZ" ]]
+    then
+        tweakatzConfig
+        btweakatz=1
+    fi
+else
+    tweakatzConfig "Config"
 fi
 
+
 if [[ $smusicPrint == "musicalPrint" ]]
+    then
+   # szAnswer2=$(zenity --entry --text "select file midi,wav,rtl file" --entry-text "$dir"); 
+    szSavePath=$(zenity --file-selection --save);echo $szSavePath
+    bmusicPrint=1
+fi
+
+if [[ $sconfigure == "Configure" ]]
     then
    # szAnswer2=$(zenity --entry --text "select file midi,wav,rtl file" --entry-text "$dir"); 
     szSavePath=$(zenity --file-selection --save);echo $szSavePath
