@@ -92,7 +92,7 @@ with open(sys.argv[1]) as f:
         found=1
         print ("Found Z - Setting Up GCode\n")
         out.write(";Resume Printing Heating\n")
-        out.write("G28 X0 Y0")
+        out.write("G28 X0 Y0\n")
         out.write("M140 S"+str(bedTemp)+"\n")
         out.write("M104 S"+str(extruderTemp)+"\n")
         out.write("M190 S"+str(bedTemp)+"\n")

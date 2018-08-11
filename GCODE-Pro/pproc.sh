@@ -268,7 +268,7 @@ fi
 if [[ $sRecover == "Recover-Print" ]]
     then
     szAnswer=$(zenity --entry --text "what z position to start at" --entry-text "0");
-    if [[szAnswer != "0" ]]
+    if [[ szAnswer != "0" ]]
     then
     brecover=1
     echo "valid height found" # parse to see or do it in python script?
