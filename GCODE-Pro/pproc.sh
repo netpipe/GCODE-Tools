@@ -247,7 +247,7 @@ then
         btweakatz=1
     fi
 else
-    tweakatzConfig "Config"
+    tweakatzConfig "config"
 fi
 
 
