@@ -267,13 +267,48 @@ fi
 
 if [[ $sRecover == "Recover-Print" ]]
     then
-    szAnswer=$(zenity --entry --text "what z position to start at" --entry-text "0");
-    if [[ szAnswer != "0" ]]
+#if atz.conf not there then message to run
+        atzform=$(cat "$dir/atz.conf")
+        iiZBed=$(echo $atzform| cut -d "|" -f1)
+        iiZhotend=$(echo $atzform| cut -d "|" -f2)
+
+    szAnswer2=$(zenity --forms --title="TweakAtZ" --text="Settings" \
+       --add-entry="z height " \
+       --add-entry="Bed Temperature- $iiZBed" \
+       --add-entry="Hotend Temperature- $iiZhotend"  \
+       --add-entry="rehome Z - use 1 to enable" )  
+
+        zStart=$(echo $szAnswer2| cut -d "|" -f1)
+        zBED=$(echo $szAnswer2| cut -d "|" -f2)
+        zHOTEND=$(echo $szAnswer2| cut -d "|" -f3)
+        rehomeZ=$(echo $szAnswer2| cut -d "|" -f4)
+
+    if [[ $zBED == "" ]]
+    then
+    zBED=$iiZBed
+    fi
+
+    if [[ $zHOTEND == "" ]]
+    then
+    zHOTEND=$iiZhotend
+    fi
+
+    echo $rehomeZ
+
+    if [[ $rehomeZ == "" ]]
+    then
+    rehomeZ=0
+    fi
+
+   # szAnswer=$(zenity --entry --text "what z position to start at" --entry-text "0");
+    if [[ $zStart != "0" ]]
     then
     brecover=1
     echo "valid height found" # parse to see or do it in python script?
-    echo $szAnswer
+   # echo $zStart
     fi
+    echo "resume printing"
+echo $zStart $zBED $zHOTEND $rehomeZ
 
 #try searching for it or close match
 fi
@@ -389,6 +424,6 @@ fi
 
 if [ $brecover -eq 1 ]
 then
-    python "$dir/resume-printZ.py" $1 $szAnswer
+    python "$dir/resume-printZ.py" $1 $zStart $zBED $zHOTEND $rehomeZ
 fi
 

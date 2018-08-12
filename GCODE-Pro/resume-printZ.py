@@ -28,22 +28,27 @@ iextruderTemp=230
 
 #Temp At Z
 height=sys.argv[2] #try and get a value that matches the layers you use otherwise it may not find it.
-if height==0:
-    height=2.7 #just testing
+#if height==0:
+#    height=2.7 #just testing
 
 
 
 
 sea = re.compile("Z"+str(height)+"*")
-bedTemp=50
-extruderTemp=225
+
+
+bedTemp=sys.argv[3]
+extruderTemp=sys.argv[4]
+
+#bedTemp=50
+#extruderTemp=225
 
 #finishing Temps
-fbedTemp=0
+#fbedTemp=0
 #fextruderTemp=225
 
 # percent finished - turn off bed
-fpercent=0.80
+#fpercent=0.80
 
 
 
@@ -92,7 +97,10 @@ with open(sys.argv[1]) as f:
         found=1
         print ("Found Z - Setting Up GCode\n")
         out.write(";Resume Printing Heating\n")
-        out.write("G28 X0 Y0\n")
+        if sys.argv[5]=="0":
+            out.write("G28 X0 Y0\n")
+        else:
+            out.write("G28\n")
         out.write("M140 S"+str(bedTemp)+"\n")
         out.write("M104 S"+str(extruderTemp)+"\n")
         out.write("M190 S"+str(bedTemp)+"\n")
