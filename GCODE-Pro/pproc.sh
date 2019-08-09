@@ -207,22 +207,44 @@ tweakatzConfig(){
         then
             iZBed=$iiZBed
         fi
+	if [[ $iZBed -gt 110 ]]
+	then
+		zenity --warning --text "bed is over 110 deg! using defaults instead."
+	fi
+
         if [[ $iZhotend == "" ]]
         then
             iZhotend=$iiZhotend
         fi
+	if [[ $iZhotend -gt 240 ]]
+	then
+		zenity --warning --text "Temperature is over 230 deg! using defaults instead."
+	fi
+
         if [[    $atZposition == "" ]]
         then
             atZposition=$iatZposition
         fi
+
         if [[ $atZBed == "" ]]
         then
             atZBed=$iatZBed
         fi
+	if [[ $atZBed -gt 110 ]]
+	then
+		zenity --warning --text "bed is over 110 deg! using defaults instead."
+	fi
+
+
         if [[  $atZhotend == "" ]]
         then
             atZhotend=$iatZhotend
         fi
+	if [[ $atZhotend -gt 240 ]]
+	then
+		zenity --warning --text "Temperature is over 230 deg! using defaults instead."
+	fi
+
         if [[  $finish == "" ]]
         then
             finish=$ifinish
@@ -285,13 +307,27 @@ if [[ $sRecover == "Recover-Print" ]]
 
     if [[ $zBED == "" ]]
     then
-    zBED=$iiZBed
+    	zBED=$iiZBed
     fi
+	if [[ $zBED -gt 110 ]]
+	then
+		zenity --warning --text "Temperature is over 110 deg! using defaults instead"
+		zBED=$iiZBed #use defaults instead
+	else
+		zBED=$iiZBed #use defaults instead
+	fi
 
     if [[ $zHOTEND == "" ]]
     then
-    zHOTEND=$iiZhotend
+	zHOTEND=$iiZhotend
     fi
+	if [[ $zHOTEND -gt 230 ]]
+    	then
+		zenity --warning --text "Temperature is over 230 deg! using defaults instead."
+		zHOTEND=$iiZhotend #use defaults instead
+	else
+    		zHOTEND=$iiZhotend #use defaults instead
+	fi
 
     echo $rehomeZ
 
