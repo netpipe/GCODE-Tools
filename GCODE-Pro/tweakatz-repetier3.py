@@ -18,8 +18,9 @@ from sys import argv
 
 
 #Initial heatup temperature
-if len(sys.argv) > 1:
+if len(sys.argv) >= 1:
     fnf = sys.argv[1]
+    print ("looks good for file " + sys.argv[1])
 else:
     fnf = 'file not found'
 
@@ -30,14 +31,14 @@ if sys.argv[2]=="":
 else:
     ibedTemp=sys.argv[2]
 
-if sys.argv[3:]:
-    iextruderTemp=sys.argv[3]
+if sys.argv[3]=="":
+    iextruderTemp=223
 else:
-    iextruderTemp=230
+    iextruderTemp=sys.argv[3]
 
 #Temp At Z
-if sys.argv[4:]:
-    height=sys.argv[4]#2.24 #try and get a value that matches the layers you use otherwise it may not find it.
+if sys.argv[4]:
+    height=sys.argv[4] #2.24 #try and get a value that matches the layers you use otherwise it may not find it.
     sea = re.compile("Z"+str(height)+"*")
     print("found argv for string height")
 else:
@@ -45,12 +46,12 @@ else:
     sea = re.compile("Z"+str(height)+"*")
     print("default height of 2.24" + str(height))
 
-if sys.argv[5:]:
+if sys.argv[5]:
     bedTemp=sys.argv[5]
 else:
     bedTemp=50
 
-if sys.argv[6:]:
+if sys.argv[6]:
     extruderTemp=sys.argv[6]
 else:
     extruderTemp=225
@@ -75,6 +76,7 @@ print (sys.argv[1]+"\n")
 #rep = re.compile("M106 S255\n\g<0>")
 out = open(sys.argv[1]+"_fixed", 'w')
 
+#out = open(sys.argv[1], 'w')
 
 #iterators for linecounts and %
 i=0
@@ -99,14 +101,40 @@ with open(sys.argv[1]) as f:
         out.write("M140 S"+str(fbedTemp)+"\n")
         out.write(r)
       #  out.write("M104 S"+str(fextruderTemp)+"\n")
-      elif re.search(re.compile("G28*"), r) is not None:
+ #     elif re.search(re.compile("G28*"), r) is not None:
+ #       print ("Found Homing Command - Inserting initial warmup.\n")
+ #       out.write(";start tweakatz write\n")
+#        out.write("M140 S"+str(ibedTemp)+"\n")
+#        out.write("M104 S"+str(iextruderTemp)+"\n")
+    #  elif bool(re.search(re.compile(";tweakatz"), r)):
+	#print("start gcode not found, Skipping code insertion\n please put ";tweakatz" string into the starting gcode from repetierhost for script to work")
+      elif re.search(re.compile(";tweakatz"), r) is not None:
         print ("Found Homing Command - Inserting initial warmup.\n")
+        out.write(";start tweakatz write\n")
+	out.write(";set Z to 4 very slow to give time to pull out larger parts, should be homed already\n")
+	out.write("G1 Z4 F10\n")
+	out.write(";initial warm temps 41deg\n")
+        out.write("M140 S41\n")
+        out.write("M104 S41\n")
+        out.write(";homing command G28\n")
+        out.write("G28\n")
+	out.write("G90\n")
+	out.write("M82\n")
+	out.write(";initial temps\n")
         out.write("M140 S"+str(ibedTemp)+"\n")
         out.write("M104 S"+str(iextruderTemp)+"\n")
+	out.write(";waiting temps\n")
+	out.write("M190 S"+str(ibedTemp)+"\n")
+	out.write("G92 E0\n")
+        out.write("M109 S"+str(iextruderTemp)+"\n")
+	out.write(";clear the corners using y40 x20\n")
+	out.write("G1 Y40 x20 F4800\n")
+
         out.write(r)
       else:
        out.write(r)
       i2=i2+1
 
+#copying file back to original.
 #os.rename(sys.argv[1]+"_fixed", sys.argv[1])
 shutil.move(sys.argv[1]+"_fixed", sys.argv[1])
