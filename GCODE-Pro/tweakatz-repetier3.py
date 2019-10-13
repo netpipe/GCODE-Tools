@@ -106,8 +106,9 @@ with open(sys.argv[1]) as f:
  #       out.write(";start tweakatz write\n")
 #        out.write("M140 S"+str(ibedTemp)+"\n")
 #        out.write("M104 S"+str(iextruderTemp)+"\n")
-    #  elif bool(re.search(re.compile(";tweakatz"), r)):
-	#print("start gcode not found, Skipping code insertion\n please put ";tweakatz" string into the starting gcode from repetierhost for script to work")
+      #elif bool(re.search(re.compile(";tweakatz"), r) is None:
+     #   print ("Found Homing Command - Inserting initial warmup.\n")
+	print("put ;tweakatz string into the starting gcode from repetierhost for script to work\n")
       elif re.search(re.compile(";tweakatz"), r) is not None:
         print ("Found Homing Command - Inserting initial warmup.\n")
         out.write(";start tweakatz write\n")
