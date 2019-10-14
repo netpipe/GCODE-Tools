@@ -61,7 +61,7 @@ fbedTemp=0
 #fextruderTemp=225
 
 # percent finished - turn off bed
-if sys.argv[6:]:
+if sys.argv[6]:
     fpercent=float(sys.argv[7])*0.01
 else:
     fpercent=0.80
@@ -87,6 +87,8 @@ with open(sys.argv[1]) as f:
         i=i+1
 #print ("this many lines"+str(i)+"\n")
 
+print("put ;tweakatz string into the starting gcode from repetierhost for script to work\n")
+
 with open(sys.argv[1]) as f:
     for r in f:
       if re.search(sea, r) is not None:
@@ -108,29 +110,26 @@ with open(sys.argv[1]) as f:
 #        out.write("M104 S"+str(iextruderTemp)+"\n")
       #elif bool(re.search(re.compile(";tweakatz"), r) is None:
      #   print ("Found Homing Command - Inserting initial warmup.\n")
-	print("put ;tweakatz string into the starting gcode from repetierhost for script to work\n")
       elif re.search(re.compile(";tweakatz"), r) is not None:
         print ("Found Homing Command - Inserting initial warmup.\n")
-        out.write(";start tweakatz write\n")
-	out.write(";set Z to 4 very slow to give time to pull out larger parts, should be homed already\n")
-	out.write("G1 Z4 F10\n")
-	out.write(";initial warm temps 41deg\n")
         out.write("M140 S41\n")
         out.write("M104 S41\n")
+#	out.write("G28 X0 Y0\n")
+#	out.write(";set Z to 4 very slow to give time to pull out larger parts, should be homed already\n")
+#	out.write("G1 Z4 F40\n")
+
         out.write(";homing command G28\n")
         out.write("G28\n")
-	out.write("G90\n")
-	out.write("M82\n")
 	out.write(";initial temps\n")
         out.write("M140 S"+str(ibedTemp)+"\n")
         out.write("M104 S"+str(iextruderTemp)+"\n")
-	out.write(";waiting temps\n")
-	out.write("M190 S"+str(ibedTemp)+"\n")
+	out.write("G90\n")
+	out.write("M82\n")
 	out.write("G92 E0\n")
+        out.write("M109 S180\n")
         out.write("M109 S"+str(iextruderTemp)+"\n")
-	out.write(";clear the corners using y40 x20\n")
+	out.write("M190 S"+str(ibedTemp)+"\n")
 	out.write("G1 Y40 x20 F4800\n")
-
         out.write(r)
       else:
        out.write(r)
