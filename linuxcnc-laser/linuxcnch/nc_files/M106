@@ -1,0 +1,4 @@
+#!/bin/sh
+halcmd sets HighGearRequest 1
+~/emc2/nc_files/waitfor HighClutch TRUE
+halcmd sets HighGearRequest 0

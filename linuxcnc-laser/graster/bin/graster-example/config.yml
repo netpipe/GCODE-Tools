@@ -1,0 +1,10 @@
+feed: 600
+dpi: [10, 10]
+offset: [1.0, 1.0]
+cut_feed: 20
+on_range: [0.0, 0.5]
+corner_radius: 0
+overshoot: 0.5
+tile_size: [false, false]
+repeat: [1, 1]
+tile_spacing: [0.125, 0.125]
