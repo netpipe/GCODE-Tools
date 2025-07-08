@@ -33,11 +33,53 @@ class GCodeViewer3D : public QOpenGLWidget, protected QOpenGLFunctions {
 public:
     GCodeViewer3D(QWidget *parent = nullptr) : QOpenGLWidget(parent) {
         setFixedSize(800, 800);
-        parseGCode("demo3d.gcode");
+       // parseGCode("demo3d.gcode");
         connect(&timer, &QTimer::timeout, this, &GCodeViewer3D::step);
         timer.start(20);
     }
 
+    void parseGCode(const QString& file) {
+        QFile f(file);
+        if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qWarning("G-code file not found");
+            return;
+        }
+
+        QTextStream in(&f);
+        while (!in.atEnd()) {
+            QString line = in.readLine().trimmed().toUpper();
+            if (line.isEmpty() || line.startsWith('(')) continue;
+
+            GCodeCommand cmd;
+            if (line.startsWith("G0")) cmd.type = GCodeCommand::Rapid;
+            else if (line.startsWith("G1")) cmd.type = GCodeCommand::Linear;
+            else if (line.startsWith("G2")) cmd.type = GCodeCommand::ArcCW;
+            else if (line.startsWith("G3")) cmd.type = GCodeCommand::ArcCCW;
+            else continue;
+
+            if (line.contains("X"))
+                cmd.target.setX(extractFloat(line, 'X'));
+            else cmd.target.setX(position.x());
+
+            if (line.contains("Y"))
+                cmd.target.setY(extractFloat(line, 'Y'));
+            else cmd.target.setY(position.y());
+
+            if (line.contains("Z"))
+                cmd.target.setZ(extractFloat(line, 'Z'));
+            else cmd.target.setZ(position.z());
+
+            if (line.contains("I"))
+                cmd.i = extractFloat(line, 'I');
+
+            if (line.contains("J"))
+                cmd.j = extractFloat(line, 'J');
+
+            cmds.append(cmd);
+        }
+
+        f.close();
+    }
 protected:
     void initializeGL() override {
         initializeOpenGLFunctions();
@@ -180,48 +222,7 @@ void step() {
 
 
 
-    void parseGCode(const QString& file) {
-        QFile f(file);
-        if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qWarning("G-code file not found");
-            return;
-        }
 
-        QTextStream in(&f);
-        while (!in.atEnd()) {
-            QString line = in.readLine().trimmed().toUpper();
-            if (line.isEmpty() || line.startsWith('(')) continue;
-
-            GCodeCommand cmd;
-            if (line.startsWith("G0")) cmd.type = GCodeCommand::Rapid;
-            else if (line.startsWith("G1")) cmd.type = GCodeCommand::Linear;
-            else if (line.startsWith("G2")) cmd.type = GCodeCommand::ArcCW;
-            else if (line.startsWith("G3")) cmd.type = GCodeCommand::ArcCCW;
-            else continue;
-
-            if (line.contains("X"))
-                cmd.target.setX(extractFloat(line, 'X'));
-            else cmd.target.setX(position.x());
-
-            if (line.contains("Y"))
-                cmd.target.setY(extractFloat(line, 'Y'));
-            else cmd.target.setY(position.y());
-
-            if (line.contains("Z"))
-                cmd.target.setZ(extractFloat(line, 'Z'));
-            else cmd.target.setZ(position.z());
-
-            if (line.contains("I"))
-                cmd.i = extractFloat(line, 'I');
-
-            if (line.contains("J"))
-                cmd.j = extractFloat(line, 'J');
-
-            cmds.append(cmd);
-        }
-
-        f.close();
-    }
 
     float extractFloat(const QString& line, QChar key) {
         int idx = line.indexOf(key);
@@ -231,25 +232,43 @@ void step() {
     }
 };
 
+#include <QApplication>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QSurfaceFormat>
+
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    // Optional: Create demo G-code if not already present
-    QFile file("demo3d.gcode");
-    if (!file.exists()) {
-        file.open(QIODevice::WriteOnly | QIODevice::Text);
-        QTextStream out(&file);
-        out << "G0 X0 Y0 Z0\n";
-        out << "G1 X50 Y0 Z-1\n";
-        out << "G1 X50 Y50 Z-1\n";
-        out << "G2 X0 Y50 I-25 J0\n";
-        out << "G3 X0 Y0 I0 J-25\n";
-        out << "G0 Z10\n";
-        file.close();
+    QString filename = QFileDialog::getOpenFileName(
+        nullptr,
+        "Open G-code File",
+        QString(),
+        "G-code Files (*.gcode *.nc *.tap *.txt);;All Files (*)"
+    );
+
+    if (filename.isEmpty()) {
+        QMessageBox::warning(nullptr, "No File", "No G-code file selected.");
+        return 0;
     }
 
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(nullptr, "Error", "Failed to open the G-code file.");
+        return 1;
+    }
+
+//    QTextStream in(&file);
+//    QStringList lines;
+//    while (!in.atEnd()) {
+//        lines << in.readLine();
+//    }
+
     GCodeViewer3D viewer;
+    viewer.resize(800, 600);
+    viewer.parseGCode(filename);
     viewer.show();
 
     return app.exec();
 }
+
