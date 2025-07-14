@@ -1,64 +1,111 @@
+#include <QApplication>
+#include <QWidget>
+#include <QVBoxLayout>
+#include <QPushButton>
+#include <QFileDialog>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QLabel>
+#include <QMessageBox>
+
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <iostream>
-#include <string>
-
-void printSupportedFormats() {
-    Assimp::Exporter exporter;
-    unsigned int formatCount = exporter.GetExportFormatCount();
-    std::cout << "Supported export formats:\n";
-    for (unsigned int i = 0; i < formatCount; ++i) {
-        const aiExportFormatDesc* formatDesc = exporter.GetExportFormatDescription(i);
-        std::cout << "- " << formatDesc->id << " (" << formatDesc->description << "): " << formatDesc->fileExtension << std::endl;
-    }
-}
-
-bool convertModel(const std::string& inputFile, const std::string& outputFile, const std::string& exportFormatId) {
+// Stub function - Replace with your Assimp conversion logic
+bool convertModel(const QString& inputFile, const QString& outputFile, const QString& formatId) {
+    // Copy your Assimp code here
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(inputFile,
+    Assimp::Exporter exporter;
+    const aiScene* scene = importer.ReadFile(inputFile.toStdString(),
                                              aiProcess_Triangulate |
                                              aiProcess_JoinIdenticalVertices |
                                              aiProcess_SortByPType);
 
     if (!scene || !scene->mRootNode) {
-        std::cerr << "Error loading model: " << importer.GetErrorString() << std::endl;
+        QMessageBox::critical(nullptr, "Error", QString("Failed to load model: ") + importer.GetErrorString());
         return false;
     }
 
-    Assimp::Exporter exporter;
-    aiReturn result = exporter.Export(scene, exportFormatId, outputFile);
-
+    aiReturn result = exporter.Export(scene, formatId.toStdString(), outputFile.toStdString());
     if (result != aiReturn_SUCCESS) {
-        std::cerr << "Error exporting model: " << exporter.GetErrorString() << std::endl;
+        QMessageBox::critical(nullptr, "Error", QString("Failed to export model: ") + exporter.GetErrorString());
         return false;
     }
 
-    std::cout << "Model converted successfully to " << outputFile << std::endl;
+    QMessageBox::information(nullptr, "Success", "Model converted successfully.");
     return true;
 }
 
-int main(int argc, char** argv) {
-    if (argc < 3) {
-        std::cout << "Usage: " << argv[0] << " <input_model> <output_model> [export_format_id]\n";
-        std::cout << "Default export format: obj\n\n";
-        printSupportedFormats();
-        return 1;
+int main(int argc, char* argv[]) {
+    QApplication app(argc, argv);
+
+    QWidget window;
+    window.setWindowTitle("Assimp Model Converter");
+    window.resize(400, 250);
+
+    QVBoxLayout* layout = new QVBoxLayout(&window);
+
+    QLabel* inputLabel = new QLabel("Input File:");
+    QLineEdit* inputPath = new QLineEdit();
+    QPushButton* browseInput = new QPushButton("Browse...");
+
+    QLabel* outputLabel = new QLabel("Output File:");
+    QLineEdit* outputPath = new QLineEdit();
+    QPushButton* browseOutput = new QPushButton("Browse...");
+
+    QLabel* formatLabel = new QLabel("Export Format:");
+    QComboBox* formatDropdown = new QComboBox();
+
+    QPushButton* convertButton = new QPushButton("Convert");
+
+    layout->addWidget(inputLabel);
+    layout->addWidget(inputPath);
+    layout->addWidget(browseInput);
+
+    layout->addWidget(outputLabel);
+    layout->addWidget(outputPath);
+    layout->addWidget(browseOutput);
+
+    layout->addWidget(formatLabel);
+    layout->addWidget(formatDropdown);
+
+    layout->addWidget(convertButton);
+
+    // Populate export formats
+    Assimp::Exporter exporter;
+    unsigned int count = exporter.GetExportFormatCount();
+    for (unsigned int i = 0; i < count; ++i) {
+        const aiExportFormatDesc* desc = exporter.GetExportFormatDescription(i);
+        formatDropdown->addItem(QString("%1 (%2)").arg(desc->description).arg(desc->fileExtension), desc->id);
     }
 
-    std::string inputFile = argv[1];
-    std::string outputFile = argv[2];
-    std::string exportFormatId = "obj";  // Default format
+    QObject::connect(browseInput, &QPushButton::clicked, [&]() {
+        QString file = QFileDialog::getOpenFileName(&window, "Select Input Model");
+        if (!file.isEmpty())
+            inputPath->setText(file);
+    });
 
-    if (argc >= 4) {
-        exportFormatId = argv[3];
-    }
+    QObject::connect(browseOutput, &QPushButton::clicked, [&]() {
+        QString file = QFileDialog::getSaveFileName(&window, "Select Output File");
+        if (!file.isEmpty())
+            outputPath->setText(file);
+    });
 
-    if (!convertModel(inputFile, outputFile, exportFormatId)) {
-        return 1;
-    }
+    QObject::connect(convertButton, &QPushButton::clicked, [&]() {
+        QString inputFile = inputPath->text();
+        QString outputFile = outputPath->text();
+        QString formatId = formatDropdown->currentData().toString();
 
-    return 0;
+        if (inputFile.isEmpty() || outputFile.isEmpty()) {
+            QMessageBox::warning(&window, "Input Error", "Please select both input and output files.");
+            return;
+        }
+
+        convertModel(inputFile, outputFile, formatId);
+    });
+
+    window.show();
+    return app.exec();
 }
