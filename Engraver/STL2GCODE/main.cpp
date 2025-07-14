@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <limits>
 
+//inspired by https://github.com/bomeara/STLtoGCODE
+
 struct Vec3 {
     float x, y, z;
 };
