@@ -1,5 +1,4 @@
-QT       += core gui multimedia opengl
-
+QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -30,7 +29,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES +=
 
 
-LIBS += -L/Users/macbook2015/Desktop/brew/lib -framework GLUT
+LIBS += -L/Users/macbook2015/Desktop/brew/lib -lassimp
 
 INCLUDEPATH += /Users/macbook2015/Desktop/brew/include /Users/macbook2015/Desktop/brew/lib
 
