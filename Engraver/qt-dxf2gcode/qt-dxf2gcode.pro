@@ -33,7 +33,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES +=
 
 
-LIBS += -L/Users/macbook2015/Desktop/brew/lib ./libdxfrw-master
+LIBS += -L/Users/macbook2015/Desktop/brew/lib -L./libdxfrw-master/ -ldxfrw
 
 INCLUDEPATH += /Users/macbook2015/Desktop/brew/include /Users/macbook2015/Desktop/brew/lib ./libdxfrw-master/src
 

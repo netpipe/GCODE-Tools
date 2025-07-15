@@ -34,6 +34,57 @@ public:
     std::map<std::string, std::vector<PathD>> layerPaths;
     Tool currentTool = { TSlot, 6.0, 1.5, 4.5, 60.0 }; // Default tool
 
+    void addHeader(const DRW_Header*) override {}
+    void addLType(const DRW_LType&) override {}
+    void addLayer(const DRW_Layer&) override {}
+    void addDimStyle(const DRW_Dimstyle&) override {}
+    void addVport(const DRW_Vport&) override {}
+    void addTextStyle(const DRW_Textstyle&) override {}
+    void addAppId(const DRW_AppId&) override {}
+    void addBlock(const DRW_Block&) override {}
+    void setBlock(const int) override {}
+    void endBlock() override {}
+    void addPoint(const DRW_Point&) override {}
+    void addRay(const DRW_Ray&) override {}
+    void addXline(const DRW_Xline&) override {}
+    void addArc(const DRW_Arc&) override {}
+    void addCircle(const DRW_Circle&) override {}
+    void addEllipse(const DRW_Ellipse&) override {}
+    void addPolyline(const DRW_Polyline&) override {}
+    void addSpline(const DRW_Spline*) override {}
+    void addKnot(const DRW_Entity&) override {}
+    void addInsert(const DRW_Insert&) override {}
+    void addTrace(const DRW_Trace&) override {}
+    void add3dFace(const DRW_3Dface&) override {}
+    void addSolid(const DRW_Solid&) override {}
+    void addMText(const DRW_MText&) override {}
+    void addText(const DRW_Text&) override {}
+    void addDimAlign(const DRW_DimAligned*) override {}
+    void addDimLinear(const DRW_DimLinear*) override {}
+    void addDimRadial(const DRW_DimRadial*) override {}
+    void addDimDiametric(const DRW_DimDiametric*) override {}
+    void addDimAngular(const DRW_DimAngular*) override {}
+    void addDimAngular3P(const DRW_DimAngular3p*) override {}
+    void addDimOrdinate(const DRW_DimOrdinate*) override {}
+    void addLeader(const DRW_Leader*) override {}
+    void addHatch(const DRW_Hatch*) override {}
+    void addViewport(const DRW_Viewport&) override {}
+    void addImage(const DRW_Image*) override {}
+    void linkImage(const DRW_ImageDef*) override {}
+    void addComment(const char*) override {}
+    void addPlotSettings(const DRW_PlotSettings*) override {}
+    void writeHeader(DRW_Header&) override {}
+    void writeBlocks() override {}
+    void writeBlockRecords() override {}
+    void writeEntities() override {}
+    void writeLTypes() override {}
+    void writeLayers() override {}
+    void writeTextstyles() override {}
+    void writeVports() override {}
+    void writeDimstyles() override {}
+    void writeObjects() override {}
+    void writeAppId() override {}
+
     DXFViewer() {
         auto* layout = new QVBoxLayout(this);
         auto* btnLoad = new QPushButton("Load DXF", this);
@@ -53,10 +104,13 @@ public:
 
         DRW_Interface* iface = this;
         DRW_Header header;
-        dxfRW::read( path.toStdString().c_str(), iface, false);
-        if (!dxfReader.read(&header)) {
-            qWarning() << "Failed to read DXF.";
-        }
+     //   dxfRW::read( path.toStdString().c_str(), iface, false);
+        dxfRW* dxf = new dxfRW(path.toStdString().c_str());
+        bool success = dxf->read(this, false);
+
+        //if (!dxfReader.read(&header)) {
+       //     qWarning() << "Failed to read DXF.";
+       // }
         update();
     }
 
@@ -108,7 +162,7 @@ public:
 
     std::string currentLayer;
 
-    void setLayer(const std::string& name) override {
+    void setLayer(const std::string& name) {
         currentLayer = name;
     }
 
@@ -124,8 +178,8 @@ public:
     void addLWPolyline(const DRW_LWPolyline& data) override {
         PathD path;
         for (const auto& v : data.vertlist) {
-            polyline.push_back(QPointF(v.x, v.y));
-            path.push_back({v.x, v.y});
+            polyline.push_back(QPointF(v->x, v->y));
+            path.push_back({v->x, v->y});
         }
         if (data.flags & 1 && !path.empty()) {
             path.push_back(path.front()); // close if needed
