@@ -126,7 +126,7 @@ public:
         shiftX = new QDoubleSpinBox(); shiftX->setRange(-9999, 9999);
         shiftX->setValue(-200);
         shiftY = new QDoubleSpinBox(); shiftY->setRange(-9999, 9999);
-        shiftY->setValue(300);
+        shiftY->setValue(500);
         flipY = new QCheckBox("Flip Y Axis");flipY->setChecked(1);
         useZaxis = new QCheckBox("Use Z Axis");useZaxis->setChecked(1);
         feedRate = new QDoubleSpinBox(); feedRate->setRange(1, 99999); feedRate->setValue(300);
@@ -135,9 +135,10 @@ public:
         finalWidthMM = new QDoubleSpinBox(); finalWidthMM->setRange(-1.0, 10000.0); finalWidthMM->setValue(-1.0);
         bezierTolerance = new QDoubleSpinBox(); bezierTolerance->setRange(0.001, 10.0); bezierTolerance->setValue(0.5);
         machineAccuracy = new QDoubleSpinBox(); machineAccuracy->setRange(0.001, 10.0); machineAccuracy->setValue(0.1);
-        zTraverse = new QDoubleSpinBox(); zTraverse->setValue(1.0);
+        zTraverse = new QDoubleSpinBox(); zTraverse->setValue(5.0);
         zEngage = new QDoubleSpinBox(); zEngage->setValue(-1.0);
         zEngage->setMinimum(-100);
+        zEngage->setValue(-0.2);
 
         bezierSmooth = new QCheckBox("Enable Bezier Smoothing"); bezierSmooth->setChecked(1);
         tspOptimize = new QCheckBox("TSP Path Optimize"); tspOptimize->setChecked(1);
