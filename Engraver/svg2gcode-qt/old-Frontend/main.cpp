@@ -31,16 +31,17 @@ public:
         useZAxis = new QCheckBox("Use Z-axis instead of Laser");
         feedRate = new QSpinBox(); feedRate->setRange(1, 100000); feedRate->setValue(3500);
         reorders = new QSpinBox(); reorders->setRange(0, 1000); reorders->setValue(30);
-        scale = new QDoubleSpinBox(); scale->setRange(0.01, 100.0); scale->setValue(1.0);
+        scale = new QDoubleSpinBox(); scale->setRange(0.01, 100.0); scale->setValue(1.0);scale->setSingleStep(0.5);
         flipYAxis = new QCheckBox("Flip Y-axis");
         width = new QDoubleSpinBox(); width->setRange(0.1, 10000.0);
         bezierTolerance = new QDoubleSpinBox(); bezierTolerance->setRange(0.01, 10.0); bezierTolerance->setValue(0.5);
         machineAccuracy = new QDoubleSpinBox(); machineAccuracy->setRange(0.001, 10.0); machineAccuracy->setValue(0.1);
         zTraverse = new QDoubleSpinBox(); zTraverse->setValue(1.0);
-        zEngage = new QDoubleSpinBox(); zEngage->setValue(-1.0);
+        zEngage = new QDoubleSpinBox(); zEngage->setValue(-1.0);        zEngage->setMinimum(-100);
         bezierSmoothing = new QCheckBox("Bezier Curve Smoothing");
         tspPath = new QCheckBox("Engrave only TSP-path");
         voronoiOptimize = new QCheckBox("Optimize for Voronoi Stipples");
+
 
         layout->addRow("Shift Y:", shiftY);
         layout->addRow("Shift X:", shiftX);
