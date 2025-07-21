@@ -10,12 +10,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QDoubleSpinBox>
-#include <QComboBox>
-#include <QGraphicsView>
-#include <QGraphicsScene>
-#include <QGraphicsLineItem>
 #include <QGroupBox>
-#include <QPen>
 #include <cmath>
 #include <QTextStream>
 
@@ -127,27 +122,6 @@ QString generateGCode(const QVector<QPointF>& points, double scale, double offse
     return gcode;
 }
 
-QString generateGCMC(const QVector<QPointF>& points, double scale, double offsetX, double offsetY) {
-    QString gcmc;
-    gcmc += "unit(mm);\n";
-    gcmc += "spindle(true);\n";
-
-    bool first = true;
-    for (const QPointF& p : points) {
-        double px = p.x() * scale + offsetX;
-        double py = p.y() * scale + offsetY;
-        if (first) {
-            gcmc += QString("goto([%1, %2]);\n").arg(px).arg(py);
-            first = false;
-        } else {
-            gcmc += QString("linear([%1, %2]);\n").arg(px).arg(py);
-        }
-    }
-
-    gcmc += "spindle(false);\n";
-    return gcmc;
-}
-
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
@@ -156,13 +130,9 @@ public:
         QVBoxLayout* layout = new QVBoxLayout(widget);
 
         QPushButton* loadButton = new QPushButton("Load SVG");
-        QPushButton* saveButton = new QPushButton("Save Output");
-        generateButton = new QPushButton("Generate Output");
+        QPushButton* saveButton = new QPushButton("Save G-Code");
+        generateButton = new QPushButton("Generate G-Code");
         generateButton->setEnabled(false);
-
-        formatSelector = new QComboBox;
-        formatSelector->addItem("G-Code");
-        formatSelector->addItem("GCMC");
 
         QGroupBox* optionsBox = new QGroupBox("Options");
         QVBoxLayout* optionsLayout = new QVBoxLayout(optionsBox);
@@ -182,29 +152,22 @@ public:
         optionsLayout->addWidget(offsetXInput);
         optionsLayout->addWidget(new QLabel("Offset Y (mm):"));
         optionsLayout->addWidget(offsetYInput);
-        optionsLayout->addWidget(new QLabel("Output Format:"));
-        optionsLayout->addWidget(formatSelector);
 
         gcodeOutput = new QTextEdit;
         gcodeOutput->setReadOnly(true);
 
-        previewScene = new QGraphicsScene;
-        previewView = new QGraphicsView(previewScene);
-        previewView->setMinimumHeight(300);
-
         layout->addWidget(loadButton);
         layout->addWidget(optionsBox);
         layout->addWidget(generateButton);
-        layout->addWidget(previewView);
         layout->addWidget(saveButton);
         layout->addWidget(gcodeOutput);
 
         setCentralWidget(widget);
-        setWindowTitle("SVG to G-Code/GCMC Converter");
+        setWindowTitle("SVG to G-Code Converter");
 
         connect(loadButton, &QPushButton::clicked, this, &MainWindow::loadSVG);
-        connect(generateButton, &QPushButton::clicked, this, &MainWindow::generateOutputFromSVG);
-        connect(saveButton, &QPushButton::clicked, this, &MainWindow::saveOutput);
+        connect(generateButton, &QPushButton::clicked, this, &MainWindow::generateGCodeFromSVG);
+        connect(saveButton, &QPushButton::clicked, this, &MainWindow::saveGCode);
     }
 
 private slots:
@@ -240,62 +203,33 @@ private slots:
         if (svgPaths.isEmpty()) {
             QMessageBox::information(this, "Info", "No paths found in SVG.");
         } else {
-            generateButton->setEnabled(true);
-            updatePreview();
             QMessageBox::information(this, "Info", "SVG loaded successfully.");
+            generateButton->setEnabled(true);
         }
     }
 
-    void generateOutputFromSVG() {
+    void generateGCodeFromSVG() {
         if (svgPaths.isEmpty()) return;
-
-        double scale = scaleInput->value();
-        double offsetX = offsetXInput->value();
-        double offsetY = offsetYInput->value();
-
-        if (formatSelector->currentText() == "GCMC") {
-            generatedOutput = generateGCMC(svgPaths, scale, offsetX, offsetY);
-        } else {
-            generatedOutput = generateGCode(svgPaths, scale, offsetX, offsetY);
-        }
-
-        gcodeOutput->setPlainText(generatedOutput);
+        generatedGCode = generateGCode(svgPaths,
+                                       scaleInput->value(),
+                                       offsetXInput->value(),
+                                       offsetYInput->value());
+        gcodeOutput->setPlainText(generatedGCode);
     }
 
-    void saveOutput() {
-        if (generatedOutput.isEmpty()) return;
-        QString fileName = QFileDialog::getSaveFileName(this, "Save Output", "", "Text Files (*.txt *.gcode *.gcmc)");
+    void saveGCode() {
+        if (generatedGCode.isEmpty()) return;
+        QString fileName = QFileDialog::getSaveFileName(this, "Save G-Code", "", "G-Code Files (*.gcode)");
         if (fileName.isEmpty()) return;
 
         QFile outFile(fileName);
         if (!outFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QMessageBox::warning(this, "Error", "Cannot save output file.");
+            QMessageBox::warning(this, "Error", "Cannot save G-Code file.");
             return;
         }
-        outFile.write(generatedOutput.toUtf8());
+        outFile.write(generatedGCode.toUtf8());
         outFile.close();
-        QMessageBox::information(this, "Saved", "File saved successfully.");
-    }
-
-    void updatePreview() {
-        previewScene->clear();
-        if (svgPaths.isEmpty()) return;
-
-        double scale = 1.0;  // Display in SVG units
-        QPointF lastPoint;
-        bool first = true;
-        QPen pen(Qt::blue, 0);
-
-        for (const QPointF& p : svgPaths) {
-            QPointF current = p * scale;
-            if (!first) {
-                previewScene->addLine(lastPoint.x(), -lastPoint.y(), current.x(), -current.y(), pen);
-            }
-            lastPoint = current;
-            first = false;
-        }
-
-        previewScene->setSceneRect(previewScene->itemsBoundingRect());
+        QMessageBox::information(this, "Saved", "G-Code file saved.");
     }
 
 private:
@@ -304,19 +238,17 @@ private:
     QDoubleSpinBox* scaleInput;
     QDoubleSpinBox* offsetXInput;
     QDoubleSpinBox* offsetYInput;
-    QComboBox* formatSelector;
-    QGraphicsScene* previewScene;
-    QGraphicsView* previewView;
     QVector<QPointF> svgPaths;
-    QString generatedOutput;
+    QString generatedGCode;
 };
 
-#include "main.moc"
+
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     MainWindow window;
-    window.resize(800, 800);
+    window.resize(700, 600);
     window.show();
     return app.exec();
 }
+#include "main.moc"
