@@ -3,142 +3,228 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QLineEdit>
+#include <QTextEdit>
 #include <QDoubleSpinBox>
-#include <QSpinBox>
 #include <QCheckBox>
 #include <QFormLayout>
-#include <QTextEdit>
-#include <QProcess>
+#include <QSpinBox>
+#include <QTextStream>
+#include <QMessageBox>
+#include <QFile>
 
-//https://github.com/holgafreak/svg2gcode frontend
+#define NANOSVG_IMPLEMENTATION
+#include "nanosvg.h"
+#include <vector>
+#include <cmath>
+#include <algorithm>
 
-class Svg2GcodeFrontend : public QWidget {
-    Q_OBJECT
-
+// Core GCode engine
+class Svg2GcodeEngine {
 public:
-    Svg2GcodeFrontend(QWidget *parent = nullptr) : QWidget(parent) {
-        auto *layout = new QFormLayout(this);
+    // Parameters
+    double shiftX = 0.0, shiftY = 0.0;
+    bool flipY = false;
+    bool useZaxis = false;
+    double feedRate = 3500;
+    int reorderPasses = 30;
+    double scale = 1.0;
+    bool bezierSmooth = false;
+    bool tspOptimize = false;
+    bool voronoiOpt = false;
+    double finalWidthMM = -1.0;
+    double bezierTolerance = 0.5;
+    double machineAccuracy = 0.1;
+    double zTraverse = 1.0;
+    double zEngage = -1.0;
 
-        QPushButton *loadButton = new QPushButton("Load SVG");
-        layout->addRow(loadButton);
+    QString generateGCode(const QString &svgFile) {
+        NSVGimage *image = nsvgParseFromFile(svgFile.toUtf8().constData(), "mm", 96);
+        if (!image)
+            return "Error: Unable to load SVG.";
 
-        filePath = new QLineEdit();
-        filePath->setReadOnly(true);
-        layout->addRow("SVG File:", filePath);
+        std::vector<std::vector<QPointF>> paths;
+        double maxY = 0.0;
 
-        shiftY = new QDoubleSpinBox(); shiftY->setRange(-10000, 10000);
-        shiftX = new QDoubleSpinBox(); shiftX->setRange(-10000, 10000);
-        useZAxis = new QCheckBox("Use Z-axis instead of Laser");
-        feedRate = new QSpinBox(); feedRate->setRange(1, 100000); feedRate->setValue(3500);
-        reorders = new QSpinBox(); reorders->setRange(0, 1000); reorders->setValue(30);
-        scale = new QDoubleSpinBox(); scale->setRange(0.01, 100.0); scale->setValue(1.0);
-        flipYAxis = new QCheckBox("Flip Y-axis");
-        width = new QDoubleSpinBox(); width->setRange(0.1, 10000.0);
-        bezierTolerance = new QDoubleSpinBox(); bezierTolerance->setRange(0.01, 10.0); bezierTolerance->setValue(0.5);
-        machineAccuracy = new QDoubleSpinBox(); machineAccuracy->setRange(0.001, 10.0); machineAccuracy->setValue(0.1);
-        zTraverse = new QDoubleSpinBox(); zTraverse->setValue(1.0);
-        zEngage = new QDoubleSpinBox(); zEngage->setValue(-1.0);
-        bezierSmoothing = new QCheckBox("Bezier Curve Smoothing");
-        tspPath = new QCheckBox("Engrave only TSP-path");
-        voronoiOptimize = new QCheckBox("Optimize for Voronoi Stipples");
-
-        layout->addRow("Shift Y:", shiftY);
-        layout->addRow("Shift X:", shiftX);
-        layout->addRow(useZAxis);
-        layout->addRow("Feed Rate:", feedRate);
-        layout->addRow("Reorders:", reorders);
-        layout->addRow("Scale:", scale);
-        layout->addRow(flipYAxis);
-        layout->addRow("Final Width (mm):", width);
-        layout->addRow("Bezier Tolerance:", bezierTolerance);
-        layout->addRow("Machine Accuracy:", machineAccuracy);
-        layout->addRow("Z-Traverse:", zTraverse);
-        layout->addRow("Z-Engage:", zEngage);
-        layout->addRow(bezierSmoothing);
-        layout->addRow(tspPath);
-        layout->addRow(voronoiOptimize);
-
-        QPushButton *generateButton = new QPushButton("Generate GCode");
-        layout->addRow(generateButton);
-
-        outputGCode = new QTextEdit();
-        layout->addRow(outputGCode);
-
-        connect(loadButton, &QPushButton::clicked, this, &Svg2GcodeFrontend::loadFile);
-        connect(generateButton, &QPushButton::clicked, this, &Svg2GcodeFrontend::generateGCode);
-    }
-
-private slots:
-    void loadFile() {
-        QString file = QFileDialog::getOpenFileName(this, "Select SVG File", "", "SVG Files (*.svg)");
-        if (!file.isEmpty()) {
-            filePath->setText(file);
+        for (NSVGshape *shape = image->shapes; shape != NULL; shape = shape->next) {
+            for (NSVGpath *path = shape->paths; path != NULL; path = path->next) {
+                std::vector<QPointF> polyline;
+                for (int i = 0; i < path->npts - 1; i += 3) {
+                    float *p = &path->pts[i * 2];
+                    float x = p[0];
+                    float y = p[1];
+                    maxY = std::max(maxY, double(y));
+                    polyline.push_back(QPointF(x, y));
+                }
+                paths.push_back(polyline);
+            }
         }
-    }
 
-    void generateGCode() {
-        if (filePath->text().isEmpty()) return;
+        QStringList gcode;
+        gcode << "G21 ; Set units to mm"
+              << "G90 ; Absolute positioning"
+              << QString("F%1").arg(feedRate);
 
-        QStringList args;
-        args << "-Y" << QString::number(shiftY->value())
-             << "-X" << QString::number(shiftX->value());
-        if (useZAxis->isChecked()) args << "-c";
-        args << "-f" << QString::number(feedRate->value())
-             << "-n" << QString::number(reorders->value())
-             << "-s" << QString::number(scale->value());
-        if (flipYAxis->isChecked()) args << "-F";
-        if (width->value() > 0.1) args << "-w" << QString::number(width->value());
-        args << "-t" << QString::number(bezierTolerance->value())
-             << "-m" << QString::number(machineAccuracy->value())
-             << "-z" << QString::number(zTraverse->value())
-             << "-Z" << QString::number(zEngage->value());
-        if (bezierSmoothing->isChecked()) args << "-B";
-        if (tspPath->isChecked()) args << "-T";
-        if (voronoiOptimize->isChecked()) args << "-V";
-        args << filePath->text();
+        for (auto &polyline : paths) {
+            if (polyline.empty())
+                continue;
+            QPointF start = transformPoint(polyline.front(), maxY);
+            gcode << QString("G0 Z%1").arg(zTraverse);
+            //gcode << QString("G0 X%1 Y%2").arg(start.x(), start.y());
+            gcode << QString("G0 X%1 Y%2")
+                        .arg(start.x(), 0, 'f', 4)
+                        .arg(start.y(), 0, 'f', 4);
 
-        QString outputFilePath = filePath->text() + ".gcode";
-        args << outputFilePath;
+            gcode << QString("G1 Z%1").arg(useZaxis ? zEngage : 0.0);
 
+            for (const QPointF &pt : polyline) {
+                QPointF p = transformPoint(pt, maxY);
+                //gcode << QString("G1 X%1 Y%2").arg(p.x()).arg(p.y());
+                gcode << QString("G1 X%1 Y%2")
+                            .arg(p.x(), 0, 'f', 4)
+                            .arg(p.y(), 0, 'f', 4);
 
+            }
 
-        QProcess process;
-        process.start(QApplication::applicationDirPath() + "/svg2gcode", args);  // assumes svg2gcode binary is in PATH
-        process.waitForFinished();
+            gcode << QString("G0 Z%1").arg(zTraverse);
+        }
 
-        QString output = process.readAllStandardOutput();
-        QString errors = process.readAllStandardError();
+        gcode << "M30 ; Program end";
 
-        outputGCode->setPlainText(output + "\n" + errors);
+        nsvgDelete(image);
+        return gcode.join("\n");
     }
 
 private:
-    QLineEdit *filePath;
-    QDoubleSpinBox *shiftY;
-    QDoubleSpinBox *shiftX;
-    QCheckBox *useZAxis;
-    QSpinBox *feedRate;
-    QSpinBox *reorders;
-    QDoubleSpinBox *scale;
-    QCheckBox *flipYAxis;
-    QDoubleSpinBox *width;
-    QDoubleSpinBox *bezierTolerance;
-    QDoubleSpinBox *machineAccuracy;
-    QDoubleSpinBox *zTraverse;
-    QDoubleSpinBox *zEngage;
-    QCheckBox *bezierSmoothing;
-    QCheckBox *tspPath;
-    QCheckBox *voronoiOptimize;
-    QTextEdit *outputGCode;
+    QPointF transformPoint(QPointF pt, double maxY) {
+        double x = (pt.x() + shiftX) * scale;
+        double y = (pt.y() + shiftY);
+
+        if (flipY)
+            y = (-y) + (maxY * 2);
+
+        y *= scale;
+        return QPointF(x, y);
+    }
 };
 
+// GUI class
+class Svg2GcodeGUI : public QWidget {
+    Q_OBJECT
+public:
+    Svg2GcodeGUI(QWidget *parent = nullptr) : QWidget(parent) {
+        auto *layout = new QFormLayout(this);
+
+        QPushButton *loadBtn = new QPushButton("Load SVG");
+        svgFilePath = new QLineEdit();
+        svgFilePath->setReadOnly(true);
+
+        shiftX = new QDoubleSpinBox(); shiftX->setRange(-9999, 9999);
+        shiftY = new QDoubleSpinBox(); shiftY->setRange(-9999, 9999);
+        flipY = new QCheckBox("Flip Y Axis");
+        useZaxis = new QCheckBox("Use Z Axis");
+        feedRate = new QDoubleSpinBox(); feedRate->setRange(1, 99999); feedRate->setValue(3500);
+        reorderPasses = new QSpinBox(); reorderPasses->setRange(0, 999); reorderPasses->setValue(30);
+        scale = new QDoubleSpinBox(); scale->setRange(0.01, 100.0); scale->setValue(1.0);
+        finalWidthMM = new QDoubleSpinBox(); finalWidthMM->setRange(-1.0, 10000.0); finalWidthMM->setValue(-1.0);
+        bezierTolerance = new QDoubleSpinBox(); bezierTolerance->setRange(0.001, 10.0); bezierTolerance->setValue(0.5);
+        machineAccuracy = new QDoubleSpinBox(); machineAccuracy->setRange(0.001, 10.0); machineAccuracy->setValue(0.1);
+        zTraverse = new QDoubleSpinBox(); zTraverse->setValue(1.0);
+        zEngage = new QDoubleSpinBox(); zEngage->setValue(-1.0);
+
+        bezierSmooth = new QCheckBox("Enable Bezier Smoothing");
+        tspOptimize = new QCheckBox("TSP Path Optimize");
+        voronoiOpt = new QCheckBox("Voronoi Optimization");
+
+        QPushButton *genBtn = new QPushButton("Generate GCode");
+        QPushButton *saveBtn = new QPushButton("Save GCode");
+        output = new QTextEdit();
+
+        layout->addRow(loadBtn);
+        layout->addRow("SVG File:", svgFilePath);
+        layout->addRow("Shift X (mm):", shiftX);
+        layout->addRow("Shift Y (mm):", shiftY);
+        layout->addRow(flipY);
+        layout->addRow(useZaxis);
+        layout->addRow("Feed Rate:", feedRate);
+        layout->addRow("Reorder Passes:", reorderPasses);
+        layout->addRow("Scale:", scale);
+        layout->addRow("Final Width (mm):", finalWidthMM);
+        layout->addRow("Bezier Tolerance:", bezierTolerance);
+        layout->addRow("Machine Accuracy:", machineAccuracy);
+        layout->addRow("Z Traverse Height:", zTraverse);
+        layout->addRow("Z Engage Depth:", zEngage);
+        layout->addRow(bezierSmooth);
+        layout->addRow(tspOptimize);
+        layout->addRow(voronoiOpt);
+        layout->addRow(genBtn);
+        layout->addRow(saveBtn);
+        layout->addRow(output);
+
+        connect(loadBtn, &QPushButton::clicked, this, &Svg2GcodeGUI::loadSVG);
+        connect(genBtn, &QPushButton::clicked, this, &Svg2GcodeGUI::generateGcode);
+        connect(saveBtn, &QPushButton::clicked, this, &Svg2GcodeGUI::saveGcode);
+    }
+
+private slots:
+    void loadSVG() {
+        QString file = QFileDialog::getOpenFileName(this, "Select SVG File", "", "*.svg");
+        if (!file.isEmpty())
+            svgFilePath->setText(file);
+    }
+
+    void generateGcode() {
+        if (svgFilePath->text().isEmpty())
+            return;
+
+        Svg2GcodeEngine engine;
+        engine.shiftX = shiftX->value();
+        engine.shiftY = shiftY->value();
+        engine.flipY = flipY->isChecked();
+        engine.useZaxis = useZaxis->isChecked();
+        engine.feedRate = feedRate->value();
+        engine.reorderPasses = reorderPasses->value();
+        engine.scale = scale->value();
+        engine.finalWidthMM = finalWidthMM->value();
+        engine.bezierTolerance = bezierTolerance->value();
+        engine.machineAccuracy = machineAccuracy->value();
+        engine.zTraverse = zTraverse->value();
+        engine.zEngage = zEngage->value();
+        engine.bezierSmooth = bezierSmooth->isChecked();
+        engine.tspOptimize = tspOptimize->isChecked();
+        engine.voronoiOpt = voronoiOpt->isChecked();
+
+        QString gcode = engine.generateGCode(svgFilePath->text());
+        output->setPlainText(gcode);
+    }
+
+    void saveGcode() {
+        QString file = QFileDialog::getSaveFileName(this, "Save GCode", "", "*.gcode");
+        if (!file.isEmpty()) {
+            QFile f(file);
+            if (f.open(QFile::WriteOnly | QFile::Text)) {
+                QTextStream s(&f);
+                s << output->toPlainText();
+                f.close();
+                QMessageBox::information(this, "Done", "GCode saved.");
+            }
+        }
+    }
+
+private:
+    QLineEdit *svgFilePath;
+    QDoubleSpinBox *shiftX, *shiftY, *feedRate, *scale, *finalWidthMM, *bezierTolerance, *machineAccuracy, *zTraverse, *zEngage;
+    QSpinBox *reorderPasses;
+    QCheckBox *flipY, *useZaxis, *bezierSmooth, *tspOptimize, *voronoiOpt;
+    QTextEdit *output;
+};
+
+#include "main.moc"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    Svg2GcodeFrontend window;
-    window.setWindowTitle("SVG2GCODE Qt Frontend");
-    window.resize(600, 800);
-    window.show();
+    Svg2GcodeGUI gui;
+    gui.setWindowTitle("svg2gcode Qt GUI");
+    gui.resize(600, 900);
+    gui.show();
     return app.exec();
 }
-#include "main.moc"
