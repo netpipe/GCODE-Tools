@@ -23,9 +23,9 @@ class Svg2GcodeEngine {
 public:
     // Parameters
     double shiftX = 0.0, shiftY = 0.0;
-    bool flipY = false;
-    bool useZaxis = false;
-    double feedRate = 3500;
+    bool flipY = true;
+    bool useZaxis = true;
+    double feedRate = 300;
     int reorderPasses = 30;
     double scale = 1.0;
     bool bezierSmooth = false;
@@ -35,7 +35,7 @@ public:
     double bezierTolerance = 0.5;
     double machineAccuracy = 0.1;
     double zTraverse = 1.0;
-    double zEngage = -1.0;
+    double zEngage = -0.20;
 
     QString generateGCode(const QString &svgFile) {
         NSVGimage *image = nsvgParseFromFile(svgFile.toUtf8().constData(), "mm", 96);
@@ -63,22 +63,24 @@ public:
         gcode << "G21 ; Set units to mm"
               << "G90 ; Absolute positioning"
               << QString("F%1").arg(feedRate);
-
+     //   gcode << QString("G1Z3F200");
+      //  gcode << QString("M03 S1000");
         for (auto &polyline : paths) {
             if (polyline.empty())
                 continue;
             QPointF start = transformPoint(polyline.front(), maxY);
+
+
             gcode << QString("G0 Z%1").arg(zTraverse);
             //gcode << QString("G0 X%1 Y%2").arg(start.x(), start.y());
             gcode << QString("G0 X%1 Y%2")
                         .arg(start.x(), 0, 'f', 4)
                         .arg(start.y(), 0, 'f', 4);
             //gcode << QString("M400");
-            gcode << QString("G1 Z%1").arg(useZaxis ? zEngage : 0.0);
-        //    gcode << QString("G0 Z%1").arg(useZaxis ? zEngage : 0.0);
+                  gcode << QString("M03 S1000");
+            gcode << QString("G1 Z%1F200").arg(useZaxis ? zEngage : 0.0);
             for (const QPointF &pt : polyline) {
                 QPointF p = transformPoint(pt, maxY);
-                //gcode << QString("G1 X%1 Y%2").arg(p.x()).arg(p.y());
                 gcode << QString("G1 X%1 Y%2")
                             .arg(p.x(), 0, 'f', 4)
                             .arg(p.y(), 0, 'f', 4);
@@ -86,8 +88,11 @@ public:
             }
 
             gcode << QString("G0 Z%1").arg(zTraverse);
+            gcode << "M05";
         }
 
+       gcode << "M05";
+        gcode << "M02";
         gcode << "M30 ; Program end";
 
         nsvgDelete(image);
@@ -119,10 +124,12 @@ public:
         svgFilePath->setReadOnly(true);
 
         shiftX = new QDoubleSpinBox(); shiftX->setRange(-9999, 9999);
+        shiftX->setValue(-200);
         shiftY = new QDoubleSpinBox(); shiftY->setRange(-9999, 9999);
-        flipY = new QCheckBox("Flip Y Axis");
-        useZaxis = new QCheckBox("Use Z Axis");
-        feedRate = new QDoubleSpinBox(); feedRate->setRange(1, 99999); feedRate->setValue(3500);
+        shiftY->setValue(300);
+        flipY = new QCheckBox("Flip Y Axis");flipY->setChecked(1);
+        useZaxis = new QCheckBox("Use Z Axis");useZaxis->setChecked(1);
+        feedRate = new QDoubleSpinBox(); feedRate->setRange(1, 99999); feedRate->setValue(300);
         reorderPasses = new QSpinBox(); reorderPasses->setRange(0, 999); reorderPasses->setValue(30);
         scale = new QDoubleSpinBox(); scale->setRange(-100.0, 100.0); scale->setValue(1.0); scale->setSingleStep(0.5);
         finalWidthMM = new QDoubleSpinBox(); finalWidthMM->setRange(-1.0, 10000.0); finalWidthMM->setValue(-1.0);
@@ -132,8 +139,8 @@ public:
         zEngage = new QDoubleSpinBox(); zEngage->setValue(-1.0);
         zEngage->setMinimum(-100);
 
-        bezierSmooth = new QCheckBox("Enable Bezier Smoothing");
-        tspOptimize = new QCheckBox("TSP Path Optimize");
+        bezierSmooth = new QCheckBox("Enable Bezier Smoothing"); bezierSmooth->setChecked(1);
+        tspOptimize = new QCheckBox("TSP Path Optimize"); tspOptimize->setChecked(1);
         voronoiOpt = new QCheckBox("Voronoi Optimization");
 
         QPushButton *genBtn = new QPushButton("Generate GCode");
