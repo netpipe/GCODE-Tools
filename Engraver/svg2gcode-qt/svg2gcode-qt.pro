@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp
 
+
 HEADERS += \
 
 FORMS += \
@@ -33,4 +34,3 @@ RESOURCES +=
 LIBS += -L/Users/macbook2015/Desktop/brew/lib -framework GLUT
 
 INCLUDEPATH += /Users/macbook2015/Desktop/brew/include /Users/macbook2015/Desktop/brew/lib
-

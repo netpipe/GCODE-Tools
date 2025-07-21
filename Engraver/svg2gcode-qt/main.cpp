@@ -73,9 +73,9 @@ public:
             gcode << QString("G0 X%1 Y%2")
                         .arg(start.x(), 0, 'f', 4)
                         .arg(start.y(), 0, 'f', 4);
-
+            //gcode << QString("M400");
             gcode << QString("G1 Z%1").arg(useZaxis ? zEngage : 0.0);
-
+        //    gcode << QString("G0 Z%1").arg(useZaxis ? zEngage : 0.0);
             for (const QPointF &pt : polyline) {
                 QPointF p = transformPoint(pt, maxY);
                 //gcode << QString("G1 X%1 Y%2").arg(p.x()).arg(p.y());
@@ -124,12 +124,13 @@ public:
         useZaxis = new QCheckBox("Use Z Axis");
         feedRate = new QDoubleSpinBox(); feedRate->setRange(1, 99999); feedRate->setValue(3500);
         reorderPasses = new QSpinBox(); reorderPasses->setRange(0, 999); reorderPasses->setValue(30);
-        scale = new QDoubleSpinBox(); scale->setRange(0.01, 100.0); scale->setValue(1.0);
+        scale = new QDoubleSpinBox(); scale->setRange(-100.0, 100.0); scale->setValue(1.0); scale->setSingleStep(0.5);
         finalWidthMM = new QDoubleSpinBox(); finalWidthMM->setRange(-1.0, 10000.0); finalWidthMM->setValue(-1.0);
         bezierTolerance = new QDoubleSpinBox(); bezierTolerance->setRange(0.001, 10.0); bezierTolerance->setValue(0.5);
         machineAccuracy = new QDoubleSpinBox(); machineAccuracy->setRange(0.001, 10.0); machineAccuracy->setValue(0.1);
         zTraverse = new QDoubleSpinBox(); zTraverse->setValue(1.0);
         zEngage = new QDoubleSpinBox(); zEngage->setValue(-1.0);
+        zEngage->setMinimum(-100);
 
         bezierSmooth = new QCheckBox("Enable Bezier Smoothing");
         tspOptimize = new QCheckBox("TSP Path Optimize");
