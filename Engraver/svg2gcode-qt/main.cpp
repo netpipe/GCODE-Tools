@@ -63,8 +63,7 @@ public:
         gcode << "G21 ; Set units to mm"
               << "G90 ; Absolute positioning"
               << QString("F%1").arg(feedRate);
-     //   gcode << QString("G1Z3F200");
-      //  gcode << QString("M03 S1000");
+        gcode << QString("M03 S1000");
         for (auto &polyline : paths) {
             if (polyline.empty())
                 continue;
@@ -77,7 +76,7 @@ public:
                         .arg(start.x(), 0, 'f', 4)
                         .arg(start.y(), 0, 'f', 4);
             //gcode << QString("M400");
-                  gcode << QString("M03 S1000");
+          //        gcode << QString("M03 S1000");
             gcode << QString("G1 Z%1F200").arg(useZaxis ? zEngage : 0.0);
             for (const QPointF &pt : polyline) {
                 QPointF p = transformPoint(pt, maxY);
@@ -88,10 +87,10 @@ public:
             }
 
             gcode << QString("G0 Z%1").arg(zTraverse);
-            gcode << "M05";
+           // gcode << "M05";
         }
 
-       gcode << "M05";
+        gcode << "M05";
         gcode << "M02";
         gcode << "M30 ; Program end";
 
