@@ -48,13 +48,29 @@ public:
         for (NSVGshape *shape = image->shapes; shape != NULL; shape = shape->next) {
             for (NSVGpath *path = shape->paths; path != NULL; path = path->next) {
                 std::vector<QPointF> polyline;
+                const int segments = bezierSmooth ? 10 : 1;
+
                 for (int i = 0; i < path->npts - 1; i += 3) {
                     float *p = &path->pts[i * 2];
-                    float x = p[0];
-                    float y = p[1];
-                    maxY = std::max(maxY, double(y));
-                    polyline.push_back(QPointF(x, y));
+
+                    float x1 = p[0], y1 = p[1];
+                    float x2 = p[2], y2 = p[3];
+                    float x3 = p[4], y3 = p[5];
+                    float x4 = p[6], y4 = p[7];
+
+                    for (int j = 0; j <= segments; ++j) {
+                        float t = (float)j / segments;
+                        float it = 1.0f - t;
+
+                        // Cubic Bezier formula
+                        float x = it*it*it*x1 + 3*it*it*t*x2 + 3*it*t*t*x3 + t*t*t*x4;
+                        float y = it*it*it*y1 + 3*it*it*t*y2 + 3*it*t*t*y3 + t*t*t*y4;
+
+                        polyline.push_back(QPointF(x, y));
+                        maxY = std::max(maxY, double(y));
+                    }
                 }
+
                 paths.push_back(polyline);
             }
         }
