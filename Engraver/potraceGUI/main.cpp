@@ -169,7 +169,7 @@ bool convertToPBM(const QString &inputPath, const QString &outputPath) {
         QString outputFormat = formatCombo->currentText();
         outputFile = fi.path() + "/" + fi.completeBaseName() + "." + outputFormat;
 
-        QString cmd = "potrace";
+        QString cmd = QApplication::applicationDirPath() + "/potrace";
 
         if (invertCheck->isChecked()) cmd += " -i";
         if (smoothCheck->isChecked()) cmd += " -a 1";
@@ -179,7 +179,7 @@ bool convertToPBM(const QString &inputPath, const QString &outputPath) {
         cmd += " -b " + outputFormat;
         cmd += " -o \"" + outputFile + "\"";
         if (pbmExport){
-                    convertToPBM(fi.absoluteFilePath(),"tmp.pbm");
+                    convertToPBM(fi.absoluteFilePath(),QApplication::applicationDirPath()  +"/tmp.pbm");
         cmd += " \"" + QApplication::applicationDirPath() + "/tmp.pbm" + "\"";
         }else{
             //cmd += " \"" + fi.absoluteFilePath() + "\"" + "-s"+ "\"";
