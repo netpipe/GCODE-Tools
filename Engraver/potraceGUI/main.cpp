@@ -56,11 +56,14 @@ public:
         invertCheck = new QCheckBox("Invert colors");
         smoothCheck = new QCheckBox("Smooth curves (-a)");
         suppressCheck = new QCheckBox("Suppress speckles (-t)");
+        pbmExport = new QCheckBox("PBMConvert");
+        pbmExport->setChecked(1);
         QHBoxLayout *turdLayout = new QHBoxLayout();
         turdSize = new QLineEdit("2");
         turdLayout->addWidget(new QLabel("Turdsize:"));
         turdLayout->addWidget(turdSize);
         optLayout->addWidget(invertCheck);
+        optLayout->addWidget(pbmExport);
         optLayout->addWidget(smoothCheck);
         optLayout->addWidget(suppressCheck);
         optLayout->addLayout(turdLayout);
@@ -162,7 +165,7 @@ bool convertToPBM(const QString &inputPath, const QString &outputPath) {
         }
 
         QFileInfo fi(file);
-      //  convertToPBM(fi.absoluteFilePath(),"tmp.pbm");
+
         QString outputFormat = formatCombo->currentText();
         outputFile = fi.path() + "/" + fi.completeBaseName() + "." + outputFormat;
 
@@ -175,8 +178,13 @@ bool convertToPBM(const QString &inputPath, const QString &outputPath) {
 
         cmd += " -b " + outputFormat;
         cmd += " -o \"" + outputFile + "\"";
-       // cmd += " \"" + QApplication::applicationDirPath() + "/tmp.pbm" + "\"";
-cmd += " \"" + fi.absoluteFilePath() + "\"";
+        if (pbmExport){
+                    convertToPBM(fi.absoluteFilePath(),"tmp.pbm");
+        cmd += " \"" + QApplication::applicationDirPath() + "/tmp.pbm" + "\"";
+        }else{
+            //cmd += " \"" + fi.absoluteFilePath() + "\"" + "-s"+ "\"";
+            cmd += " \"" + fi.absoluteFilePath() + "\"";
+        }
 
         log("Running: " + cmd);
 
@@ -256,6 +264,7 @@ private:
     QCheckBox *invertCheck;
     QCheckBox *smoothCheck;
     QCheckBox *suppressCheck;
+    QCheckBox *pbmExport;
     QLineEdit *turdSize;
     QLineEdit *commandPreview;
     QPlainTextEdit *logOutput;
