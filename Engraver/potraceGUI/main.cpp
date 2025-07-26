@@ -162,7 +162,7 @@ bool convertToPBM(const QString &inputPath, const QString &outputPath) {
         }
 
         QFileInfo fi(file);
-        convertToPBM(fi.absoluteFilePath(),"tmp.pbm");
+      //  convertToPBM(fi.absoluteFilePath(),"tmp.pbm");
         QString outputFormat = formatCombo->currentText();
         outputFile = fi.path() + "/" + fi.completeBaseName() + "." + outputFormat;
 
@@ -175,7 +175,8 @@ bool convertToPBM(const QString &inputPath, const QString &outputPath) {
 
         cmd += " -b " + outputFormat;
         cmd += " -o \"" + outputFile + "\"";
-        cmd += " \"" + QApplication::applicationDirPath() + "/tmp.pbm" + "\"";
+       // cmd += " \"" + QApplication::applicationDirPath() + "/tmp.pbm" + "\"";
+cmd += " \"" + fi.absoluteFilePath() + "\"";
 
         log("Running: " + cmd);
 
