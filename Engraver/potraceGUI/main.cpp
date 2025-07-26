@@ -175,7 +175,7 @@ bool convertToPBM(const QString &inputPath, const QString &outputPath) {
 
         cmd += " -b " + outputFormat;
         cmd += " -o \"" + outputFile + "\"";
-        cmd += " \"" + QApplication::applicationDirPath() + "/tmp.pbm" + "\"" + " -s" + "\"";
+        cmd += " \"" + QApplication::applicationDirPath() + "/tmp.pbm" + "\"";
 
         log("Running: " + cmd);
 
